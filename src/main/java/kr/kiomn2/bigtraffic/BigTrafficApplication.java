@@ -1,4 +1,4 @@
-package kr.kiomn2;
+package kr.kiomn2.bigtraffic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -80,7 +80,7 @@ Database credentials are defined in `docker/docker-compose.yml`. Application dat
 
 ### Recent Package Refactoring
 The codebase has undergone a package restructuring:
-- Main application moved from `kr.kiomn2.newsletter.bigtraffic` to `kr.kiomn2`
+- Main application moved from `kr.kiomn2.newsletter.bigtraffic` to `kr.kiomn2.bigtraffic`
 - Test package path still references old structure (`kr.kiomn2.bigtraffic`)
 - This inconsistency should be noted when creating new packages or moving files
 
