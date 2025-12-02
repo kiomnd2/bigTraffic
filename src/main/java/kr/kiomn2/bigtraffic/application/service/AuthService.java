@@ -23,7 +23,7 @@ public class AuthService {
      * 회원가입
      */
     @Transactional
-    public String register(String email, String password) {
+    public String register(String email, String username, String password) {
         // 이메일 중복 확인
         if (userRepository.existsByEmail(email)) {
             throw new DuplicateEmailException();
@@ -35,6 +35,7 @@ public class AuthService {
         // 유저 생성
         User user = User.builder()
                 .email(email)
+                .username(username)
                 .password(encodedPassword)
                 .build();
 
@@ -62,5 +63,16 @@ public class AuthService {
 
         // JWT 토큰 생성 및 반환
         return jwtTokenProvider.createToken(email);
+    }
+
+    /**
+     * 회원탈퇴
+     */
+    @Transactional
+    public void withdrawal(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        userRepository.delete(user);
     }
 }
