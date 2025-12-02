@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:5.7
+    restart: always
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: qwer1234
+      MYSQL_DATABASE: kiomnd2-db
+      MYSQL_USER: kiomnd2
+      MYSQL_PASSWORD: qwer1234
+    ports:
+      - "13306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d  # 초기 SQL 스크립트용 (선택사항)
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  mysql_data:
+    driver: local
