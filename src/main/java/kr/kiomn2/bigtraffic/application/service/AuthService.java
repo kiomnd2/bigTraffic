@@ -7,6 +7,10 @@ import kr.kiomn2.bigtraffic.domain.exception.UserNotFoundException;
 import kr.kiomn2.bigtraffic.infrastructure.repository.UserRepository;
 import kr.kiomn2.bigtraffic.infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +22,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * 회원가입
@@ -50,19 +55,22 @@ public class AuthService {
      */
     @Transactional
     public String login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+            User user = (User) authentication.getPrincipal();
+
+            // 최근 로그인 날짜 업데이트
+            user.setLastLoginDate(java.time.LocalDateTime.now());
+            userRepository.save(user);
+
+            // JWT 토큰 생성 및 반환
+            return jwtTokenProvider.createToken(email);
+        } catch (AuthenticationException e) {
             throw new InvalidPasswordException();
         }
-
-        // 최근 로그인 날짜 업데이트
-        user.setLastLoginDate(java.time.LocalDateTime.now());
-        userRepository.save(user);
-
-        // JWT 토큰 생성 및 반환
-        return jwtTokenProvider.createToken(email);
     }
 
     /**
