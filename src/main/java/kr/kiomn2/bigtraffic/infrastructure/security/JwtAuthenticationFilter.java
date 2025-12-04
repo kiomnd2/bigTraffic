@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.kiomn2.bigtraffic.application.service.JwtBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
+    private final JwtBlacklistService jwtBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -29,6 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = getTokenFromRequest(request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
+            // 블랙리스트 체크
+            if (jwtBlacklistService.isBlacklisted(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String email = jwtTokenProvider.getEmail(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 

@@ -1,6 +1,7 @@
 package kr.kiomn2.bigtraffic.interfaces.api;
 
 import kr.kiomn2.bigtraffic.application.service.AuthService;
+import kr.kiomn2.bigtraffic.application.service.JwtBlacklistService;
 import kr.kiomn2.bigtraffic.infrastructure.security.JwtTokenProvider;
 import kr.kiomn2.bigtraffic.interfaces.dto.AuthResponse;
 import kr.kiomn2.bigtraffic.interfaces.dto.LoginRequest;
@@ -18,6 +19,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtBlacklistService jwtBlacklistService;
 
     /**
      * 회원가입
@@ -52,6 +54,19 @@ public class AuthController {
     }
 
     /**
+     * 로그아웃 (JWT 블랙리스트에 추가)
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponse> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String token = authorizationHeader.substring(7); // "Bearer " 제거
+
+        // 토큰을 블랙리스트에 추가
+        jwtBlacklistService.addToBlacklist(token, "LOGOUT");
+
+        return ResponseEntity.ok(new AuthResponse(null, "로그아웃이 완료되었습니다."));
+    }
+
+    /**
      * 토큰 유효성 검증
      */
     @SecurityRequirements
@@ -67,6 +82,11 @@ public class AuthController {
             boolean isValid = jwtTokenProvider.validateToken(token);
 
             if (isValid) {
+                // 블랙리스트 체크
+                if (jwtBlacklistService.isBlacklisted(token)) {
+                    return ResponseEntity.ok(new TokenValidationResponse(false, "블랙리스트에 등록된 토큰입니다."));
+                }
+
                 String email = jwtTokenProvider.getEmail(token);
                 return ResponseEntity.ok(new TokenValidationResponse(true, email, "유효한 토큰입니다."));
             } else {
