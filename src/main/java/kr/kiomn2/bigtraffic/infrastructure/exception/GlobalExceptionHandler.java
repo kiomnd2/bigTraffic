@@ -1,4 +1,4 @@
-package kr.kiomn2.bigtraffic.infrastructure.auth.exception;
+package kr.kiomn2.bigtraffic.infrastructure.exception;
 
 import kr.kiomn2.bigtraffic.domain.auth.exception.BusinessException;
 import kr.kiomn2.bigtraffic.domain.auth.exception.ErrorCode;

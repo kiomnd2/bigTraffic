@@ -7,19 +7,20 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 @Entity
 @Table(name = "users")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User implements UserDetails {
+public class User implements UserDetails, OAuth2User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,14 +32,14 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column
-    private String password;
-
     @Column(length = 20)
     private String provider;
 
     @Column(name = "provider_id", length = 100)
     private String providerId;
+
+    @Column(name = "profile_url", length = 500)
+    private String profileUrl;
 
     @Column(name = "last_login_date")
     private LocalDateTime lastLoginDate;
@@ -58,7 +59,8 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        // OAuth 전용 로그인이므로 password는 사용하지 않음
+        return null;
     }
 
     @Override
@@ -86,7 +88,14 @@ public class User implements UserDetails {
         return true;
     }
 
+    @Override
     public String getName() {
         return username;
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        // OAuth2 로그인 시 필요한 경우에만 사용, 기본적으로는 빈 Map 반환
+        return Collections.emptyMap();
     }
 }

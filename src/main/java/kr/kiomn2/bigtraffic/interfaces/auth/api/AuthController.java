@@ -4,8 +4,6 @@ import kr.kiomn2.bigtraffic.application.auth.service.AuthService;
 import kr.kiomn2.bigtraffic.application.auth.service.JwtBlacklistService;
 import kr.kiomn2.bigtraffic.infrastructure.auth.security.JwtTokenProvider;
 import kr.kiomn2.bigtraffic.interfaces.auth.dto.AuthResponse;
-import kr.kiomn2.bigtraffic.interfaces.auth.dto.LoginRequest;
-import kr.kiomn2.bigtraffic.interfaces.auth.dto.RegisterRequest;
 import kr.kiomn2.bigtraffic.interfaces.auth.dto.TokenValidationResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
@@ -21,25 +19,6 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtBlacklistService jwtBlacklistService;
 
-    /**
-     * 회원가입
-     */
-    @SecurityRequirements
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
-        String token = authService.register(request.getEmail(), request.getUsername(), request.getPassword());
-        return ResponseEntity.ok(new AuthResponse(token, "회원가입이 완료되었습니다."));
-    }
-
-    /**
-     * 로그인
-     */
-    @SecurityRequirements
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        String token = authService.login(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(new AuthResponse(token, "로그인이 완료되었습니다."));
-    }
 
     /**
      * 회원탈퇴

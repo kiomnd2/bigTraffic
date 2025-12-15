@@ -1,4 +1,4 @@
-package kr.kiomn2.bigtraffic.infrastructure.auth.config;
+package kr.kiomn2.bigtraffic.infrastructure.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
