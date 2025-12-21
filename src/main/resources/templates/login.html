@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Traffic - OAuth 로그인</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .login-button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+        }
+
+        .kakao-login {
+            background-color: #FEE500;
+            color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .kakao-login:hover {
+            background-color: #FDD835;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(254, 229, 0, 0.4);
+        }
+
+        .kakao-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #FEE500;
+        }
+
+        .divider {
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #999;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .info-box {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .info-box p {
+            font-size: 12px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🚦</div>
+        <h1>Big Traffic</h1>
+        <p class="subtitle">OAuth 2.0 로그인 테스트</p>
+
+        <a href="/oauth2/authorization/kakao" class="login-button kakao-login">
+            <span class="kakao-icon">K</span>
+            <span>카카오로 시작하기</span>
+        </a>
+
+        <div class="divider">
+            <span>소셜 로그인</span>
+        </div>
+
+        <div class="info-box">
+            <h3>테스트 로그인 페이지</h3>
+            <ul class="feature-list">
+                <li>간편한 카카오 OAuth 로그인</li>
+                <li>JWT 토큰 기반 인증</li>
+                <li>안전한 사용자 정보 관리</li>
+            </ul>
+        </div>
+
+        <div class="info-box" style="margin-top: 15px; background: #fff3cd; border: 1px solid #ffc107;">
+            <h3 style="color: #856404;">⚠️ 개발자 노트</h3>
+            <p style="color: #856404;">
+                카카오 OAuth 설정이 필요합니다.<br>
+                <strong>application.properties</strong>에서<br>
+                CLIENT_ID와 CLIENT_SECRET을 설정하세요.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 애니메이션
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.login-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                container.style.transition = 'all 0.5s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+
+        // URL에서 에러 파라미터 확인
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+
+        if (error) {
+            const infoBox = document.createElement('div');
+            infoBox.className = 'info-box';
+            infoBox.style.marginTop = '15px';
+            infoBox.style.background = '#f8d7da';
+            infoBox.style.border = '1px solid #f5c6cb';
+            infoBox.innerHTML = '<h3 style="color: #721c24;">❌ 로그인 실패</h3><p style="color: #721c24;">로그인 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+            document.querySelector('.login-container').appendChild(infoBox);
+        }
+    </script>
+</body>
+</html>

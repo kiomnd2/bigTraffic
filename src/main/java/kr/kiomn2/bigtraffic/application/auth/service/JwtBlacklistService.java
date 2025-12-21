@@ -69,7 +69,9 @@ public class JwtBlacklistService {
     @Transactional(readOnly = true)
     public boolean isBlacklisted(String token) {
         // 토큰이 블랙리스트에 있고, 아직 만료되지 않은 경우만 true 반환
-        return blacklistedTokenRepository.existsByTokenAndExpirationDateAfter(token, LocalDateTime.now());
+        boolean isBlacklisted = blacklistedTokenRepository.existsByTokenAndExpirationDateAfter(token, LocalDateTime.now());
+        log.debug("토큰 블랙리스트 체크 결과: {}", isBlacklisted);
+        return isBlacklisted;
     }
 
     /**

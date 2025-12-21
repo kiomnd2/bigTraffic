@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Traffic - 사용자 정보</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .profile-section {
+            display: none;
+        }
+
+        .profile-section.show {
+            display: block;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .profile-email {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-kakao {
+            background: #FEE500;
+            color: #000000;
+        }
+
+        .badge-google {
+            background: #4285F4;
+            color: white;
+        }
+
+        .badge-naver {
+            background: #03C75A;
+            color: white;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .token-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .token-section h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .token-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #495057;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 480px) {
+            .user-card {
+                padding: 30px 20px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-card">
+            <div class="header">
+                <div class="logo">🚦</div>
+                <h1>Big Traffic</h1>
+                <p class="subtitle">사용자 정보</p>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>사용자 정보를 불러오는 중...</p>
+            </div>
+
+            <div class="profile-section" id="profileSection">
+                <div class="profile-header">
+                    <div class="profile-image" id="profileImage">👤</div>
+                    <div class="profile-name" id="profileName">-</div>
+                    <div class="profile-email" id="profileEmail">-</div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">사용자 ID</span>
+                        <span class="info-value" id="userId">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">로그인 제공자</span>
+                        <span class="info-value" id="provider">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">제공자 ID</span>
+                        <span class="info-value" id="providerId">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">마지막 로그인</span>
+                        <span class="info-value" id="lastLogin">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">가입일</span>
+                        <span class="info-value" id="createdAt">-</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="refreshToken()">토큰 갱신</button>
+                    <button class="btn btn-secondary" onclick="logout()">로그아웃</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="token-section">
+            <h3>🔐 Access Token</h3>
+            <div class="info-grid" style="margin-bottom: 15px;">
+                <div class="info-item">
+                    <span class="info-label">Token Type</span>
+                    <span class="info-value"><span class="badge" style="background: #28a745; color: white;">Bearer</span></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Expires In</span>
+                    <span class="info-value" id="expiresIn">-</span>
+                </div>
+            </div>
+            <div class="token-box" id="tokenBox">토큰을 불러오는 중...</div>
+            <button class="copy-btn" onclick="copyToken()">Access Token 복사</button>
+        </div>
+    </div>
+
+    <script>
+        let currentToken = null;
+
+        // 페이지 로드 시 토큰 확인 및 사용자 정보 로드
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            if (token) {
+                currentToken = token;
+                document.getElementById('tokenBox').textContent = token;
+
+                // JWT 토큰에서 만료 시간 추출
+                try {
+                    const tokenPayload = parseJwt(token);
+                    if (tokenPayload && tokenPayload.exp) {
+                        const expirationDate = new Date(tokenPayload.exp * 1000);
+                        const now = new Date();
+                        const secondsRemaining = Math.floor((expirationDate - now) / 1000);
+
+                        if (secondsRemaining > 0) {
+                            const hours = Math.floor(secondsRemaining / 3600);
+                            const minutes = Math.floor((secondsRemaining % 3600) / 60);
+                            document.getElementById('expiresIn').textContent =
+                                `${hours}시간 ${minutes}분 (${formatDate(expirationDate)})`;
+                        } else {
+                            document.getElementById('expiresIn').textContent = '만료됨';
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to parse token', e);
+                    document.getElementById('expiresIn').textContent = '알 수 없음';
+                }
+
+                loadUserInfo(token);
+            } else {
+                showError('토큰이 없습니다. 다시 로그인해주세요.');
+            }
+        });
+
+        // JWT 토큰 파싱 함수
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function loadUserInfo(token) {
+            fetch('/api/auth/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('사용자 정보를 불러올 수 없습니다.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayUserInfo(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(error.message);
+            });
+        }
+
+        function displayUserInfo(user) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('profileSection').classList.add('show');
+
+            // 사용자 이름의 첫 글자로 프로필 이미지 생성
+            const firstLetter = user.username ? user.username.charAt(0).toUpperCase() : '?';
+            document.getElementById('profileImage').textContent = firstLetter;
+
+            document.getElementById('profileName').textContent = user.username || '-';
+            document.getElementById('profileEmail').textContent = user.email || '-';
+            document.getElementById('userId').textContent = user.id || '-';
+
+            // 제공자 뱃지 생성
+            const providerElement = document.getElementById('provider');
+            if (user.provider) {
+                const badgeClass = user.provider === 'kakao' ? 'badge-kakao' :
+                                   user.provider === 'google' ? 'badge-google' :
+                                   user.provider === 'naver' ? 'badge-naver' : '';
+                providerElement.innerHTML = `<span class="badge ${badgeClass}">${user.provider.toUpperCase()}</span>`;
+            } else {
+                providerElement.textContent = '-';
+            }
+
+            document.getElementById('providerId').textContent = user.providerId || '-';
+            document.getElementById('lastLogin').textContent = formatDate(user.lastLoginDate);
+            document.getElementById('createdAt').textContent = formatDate(user.createdAt);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showError(message) {
+            document.getElementById('loading').innerHTML =
+                `<div class="error-message">❌ ${message}<br><a href="/login" style="color: #721c24; margin-top: 10px; display: inline-block;">로그인 페이지로 돌아가기</a></div>`;
+        }
+
+        function copyToken() {
+            const tokenBox = document.getElementById('tokenBox');
+            const textArea = document.createElement('textarea');
+            textArea.value = tokenBox.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '복사됨! ✓';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        function refreshToken() {
+            alert('토큰 갱신 기능은 추후 구현 예정입니다.');
+        }
+
+        function logout() {
+            if (!currentToken) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (confirm('로그아웃 하시겠습니까?')) {
+                fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + currentToken
+                    }
+                })
+                .then(() => {
+                    window.location.href = '/login';
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    window.location.href = '/login';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

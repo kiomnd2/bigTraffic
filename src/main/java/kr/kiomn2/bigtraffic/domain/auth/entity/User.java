@@ -98,4 +98,11 @@ public class User implements UserDetails, OAuth2User {
         // OAuth2 로그인 시 필요한 경우에만 사용, 기본적으로는 빈 Map 반환
         return Collections.emptyMap();
     }
+
+    /**
+     * 마지막 로그인 시간 업데이트
+     */
+    public void updateLastLoginDate() {
+        this.lastLoginDate = LocalDateTime.now();
+    }
 }

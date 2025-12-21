@@ -63,4 +63,11 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    /**
+     * 토큰 만료 시간 (밀리초)
+     */
+    public long getExpirationTime() {
+        return validityInMilliseconds;
+    }
 }
