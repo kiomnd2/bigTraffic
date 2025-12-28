@@ -2,6 +2,7 @@ package kr.kiomn2.bigtraffic.infrastructure.config;
 
 import kr.kiomn2.bigtraffic.infrastructure.auth.security.oauth.CustomOAuth2UserService;
 import kr.kiomn2.bigtraffic.infrastructure.auth.security.JwtAuthenticationFilter;
+import kr.kiomn2.bigtraffic.infrastructure.auth.security.oauth.OAuth2AuthenticationFailureHandler;
 import kr.kiomn2.bigtraffic.infrastructure.auth.security.oauth.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -30,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/login", "/user-info", "/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/api/auth/validate").permitAll()
+                        .requestMatchers("/api/auth/kakao/callback").permitAll()
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated())
@@ -37,7 +40,8 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService))
-                        .successHandler(oAuth2AuthenticationSuccessHandler))
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

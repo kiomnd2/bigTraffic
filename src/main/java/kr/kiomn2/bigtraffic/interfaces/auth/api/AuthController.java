@@ -2,15 +2,19 @@ package kr.kiomn2.bigtraffic.interfaces.auth.api;
 
 import kr.kiomn2.bigtraffic.application.auth.service.AuthService;
 import kr.kiomn2.bigtraffic.application.auth.service.JwtBlacklistService;
+import kr.kiomn2.bigtraffic.application.auth.service.KakaoAuthService;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import kr.kiomn2.bigtraffic.infrastructure.auth.repository.UserRepository;
 import kr.kiomn2.bigtraffic.infrastructure.auth.security.JwtTokenProvider;
 import kr.kiomn2.bigtraffic.interfaces.auth.dto.AuthResponse;
+import kr.kiomn2.bigtraffic.interfaces.auth.dto.KakaoCallbackRequest;
+import kr.kiomn2.bigtraffic.interfaces.auth.dto.KakaoLoginResponse;
 import kr.kiomn2.bigtraffic.interfaces.auth.dto.TokenValidationResponse;
 import kr.kiomn2.bigtraffic.interfaces.auth.dto.UserInfoResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +28,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtBlacklistService jwtBlacklistService;
     private final UserRepository userRepository;
+    private final KakaoAuthService kakaoAuthService;
 
 
     /**
@@ -112,5 +117,23 @@ public class AuthController {
 
         log.info("사용자 정보 조회 성공 - userId: {}, email: {}", user.getId(), email);
         return ResponseEntity.ok(UserInfoResponse.from(user));
+    }
+
+    /**
+     * 카카오 로그인 콜백 처리
+     */
+    @SecurityRequirements
+    @PostMapping("/kakao/callback")
+    public ResponseEntity<KakaoLoginResponse> kakaoCallback(@RequestBody KakaoCallbackRequest request) {
+        try {
+            log.info("카카오 로그인 콜백 요청 - code: {}", request.getCode());
+            String jwtToken = kakaoAuthService.processKakaoLogin(request.getCode());
+            log.info("카카오 로그인 성공 - JWT 토큰 발급 완료");
+            return ResponseEntity.ok(new KakaoLoginResponse(jwtToken, "로그인 성공"));
+        } catch (Exception e) {
+            log.error("카카오 로그인 처리 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new KakaoLoginResponse(null, "로그인 실패: " + e.getMessage()));
+        }
     }
 }

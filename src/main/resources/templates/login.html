@@ -173,10 +173,10 @@
         <h1>Big Traffic</h1>
         <p class="subtitle">OAuth 2.0 로그인 테스트</p>
 
-        <a href="/oauth2/authorization/kakao" class="login-button kakao-login">
+        <button onclick="loginWithKakao()" class="login-button kakao-login">
             <span class="kakao-icon">K</span>
             <span>카카오로 시작하기</span>
-        </a>
+        </button>
 
         <div class="divider">
             <span>소셜 로그인</span>
@@ -202,6 +202,24 @@
     </div>
 
     <script>
+        // 카카오 REST API 설정
+        const KAKAO_CLIENT_ID = 'de1d687513aeb00f8a95712157bc6639';
+        const KAKAO_REDIRECT_URI = window.location.origin + '/api/auth/kakao/callback';
+        const KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize';
+
+        // 카카오 로그인 - REST API 방식
+        function loginWithKakao() {
+            const params = new URLSearchParams({
+                client_id: KAKAO_CLIENT_ID,
+                redirect_uri: KAKAO_REDIRECT_URI,
+                response_type: 'code',
+                scope: 'profile_nickname,account_email'
+            });
+
+            // 카카오 인가 페이지로 리다이렉트
+            window.location.href = `${KAKAO_AUTH_URL}?${params.toString()}`;
+        }
+
         // 페이지 로드 시 애니메이션
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.querySelector('.login-container');

@@ -20,4 +20,9 @@ public class LoginController {
     public String userInfo() {
         return "user-info";
     }
+
+    @GetMapping("/api/auth/kakao/callback")
+    public String kakaoCallback() {
+        return "kakao-callback";
+    }
 }

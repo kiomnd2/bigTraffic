@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import kr.kiomn2.bigtraffic.infrastructure.auth.security.JwtTokenProvider;
-import kr.kiomn2.bigtraffic.interfaces.auth.dto.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -30,21 +29,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String accessToken = jwtTokenProvider.createToken(user.getEmail());
         long expiresIn = jwtTokenProvider.getExpirationTime() / 1000; // 초 단위로 변환
 
-        // TokenResponse 생성 (로깅 및 응답용)
-        TokenResponse tokenResponse = TokenResponse.of(
-                accessToken,
-                expiresIn,
-                user.getEmail(),
-                user.getName(),
-                user.getProvider()
-        );
-
         log.info("OAuth2 로그인 성공 - AccessToken 발급");
-        log.info("  - Email: {}", tokenResponse.getEmail());
-        log.info("  - Username: {}", tokenResponse.getUsername());
-        log.info("  - Provider: {}", tokenResponse.getProvider());
-        log.info("  - TokenType: {}", tokenResponse.getTokenType());
-        log.info("  - ExpiresIn: {} seconds", tokenResponse.getExpiresIn());
+        log.info("  - Email: {}", user.getEmail());
+        log.info("  - Username: {}", user.getName());
+        log.info("  - Provider: {}", user.getProvider());
+        log.info("  - TokenType: Bearer");
+        log.info("  - ExpiresIn: {} seconds", expiresIn);
         log.debug("  - AccessToken: {}...", accessToken.substring(0, Math.min(20, accessToken.length())));
 
         // 로컬 사용자 정보 페이지로 리다이렉트 (accessToken을 query parameter로 전달)
