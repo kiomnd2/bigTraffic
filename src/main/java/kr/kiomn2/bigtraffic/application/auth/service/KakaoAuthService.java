@@ -33,7 +33,8 @@ public class KakaoAuthService {
     @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
     private String redirectUri;
 
-    /**
+/** ~
+     *
      * 카카오 인가 코드로 액세스 토큰 받기
      */
     public String getKakaoAccessToken(String code) {

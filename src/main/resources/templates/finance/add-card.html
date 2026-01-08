@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카드 추가</title>
+    <link rel="stylesheet" th:href="@{/css/finance.css}">
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <a href="/finance/user-info" class="btn-back">← 돌아가기</a>
+        <h1>카드 추가</h1>
+    </header>
+
+    <div class="content">
+        <form id="addCardForm" class="form-container">
+            <div class="form-group">
+                <label for="cardName">카드명 <span class="required">*</span></label>
+                <input type="text" id="cardName" name="cardName" placeholder="예) 주카드" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cardCompany">카드사 <span class="required">*</span></label>
+                <input type="text" id="cardCompany" name="cardCompany" placeholder="예) 신한카드" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cardNumber">카드번호 <span class="required">*</span></label>
+                <input type="text" id="cardNumber" name="cardNumber" placeholder="'-' 없이 입력" required maxlength="16">
+            </div>
+
+            <div class="form-group">
+                <label for="cardType">카드 유형 <span class="required">*</span></label>
+                <select id="cardType" name="cardType" required>
+                    <option value="">선택하세요</option>
+                    <option th:each="type : ${cardTypes}" th:value="${type}" th:text="${type}">유형</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="balanceGroup">
+                <label for="balance">잔액</label>
+                <input type="number" id="balance" name="balance" placeholder="0" min="0">
+            </div>
+
+            <div class="form-group" id="creditLimitGroup" style="display: none;">
+                <label for="creditLimit">신용 한도</label>
+                <input type="number" id="creditLimit" name="creditLimit" placeholder="0" min="0">
+            </div>
+
+            <div class="form-group" id="billingDayGroup" style="display: none;">
+                <label for="billingDay">결제일</label>
+                <input type="number" id="billingDay" name="billingDay" placeholder="1-31" min="1" max="31">
+            </div>
+
+            <div class="form-group">
+                <label for="color">색상</label>
+                <div class="color-picker">
+                    <input type="color" id="color" name="color" value="#EC4899">
+                    <span class="color-preview" id="colorPreview"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="memo">메모</label>
+                <textarea id="memo" name="memo" rows="3" placeholder="메모를 입력하세요"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="history.back()">취소</button>
+                <button type="submit" class="btn-primary">추가</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 카드 유형에 따라 입력 필드 표시/숨김
+    document.getElementById('cardType').addEventListener('change', function(e) {
+        const cardType = e.target.value;
+        const balanceGroup = document.getElementById('balanceGroup');
+        const creditLimitGroup = document.getElementById('creditLimitGroup');
+        const billingDayGroup = document.getElementById('billingDayGroup');
+
+        if (cardType === 'DEBIT' || cardType === 'CHECK') {
+            balanceGroup.style.display = 'block';
+            creditLimitGroup.style.display = 'none';
+            billingDayGroup.style.display = 'none';
+        } else if (cardType === 'CREDIT') {
+            balanceGroup.style.display = 'none';
+            creditLimitGroup.style.display = 'block';
+            billingDayGroup.style.display = 'block';
+        } else {
+            balanceGroup.style.display = 'block';
+            creditLimitGroup.style.display = 'none';
+            billingDayGroup.style.display = 'none';
+        }
+    });
+
+    document.getElementById('addCardForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const cardType = document.getElementById('cardType').value;
+        const formData = {
+            cardName: document.getElementById('cardName').value,
+            cardCompany: document.getElementById('cardCompany').value,
+            cardNumber: document.getElementById('cardNumber').value,
+            cardType: cardType,
+            color: document.getElementById('color').value,
+            memo: document.getElementById('memo').value
+        };
+
+        // 카드 유형에 따라 필드 추가
+        if (cardType === 'DEBIT' || cardType === 'CHECK') {
+            formData.balance = document.getElementById('balance').value || 0;
+        } else if (cardType === 'CREDIT') {
+            formData.creditLimit = document.getElementById('creditLimit').value || 0;
+            formData.billingDay = document.getElementById('billingDay').value || 1;
+        }
+
+        try {
+            const response = await fetch('/api/v1/cards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                alert('카드가 추가되었습니다.');
+                window.location.href = '/finance/user-info';
+            } else {
+                const error = await response.json();
+                alert('카드 추가에 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('카드 추가 중 오류가 발생했습니다.');
+        }
+    });
+
+    // 색상 미리보기
+    document.getElementById('color').addEventListener('input', function(e) {
+        document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+    });
+
+    // 초기 색상 설정
+    document.getElementById('colorPreview').style.backgroundColor = document.getElementById('color').value;
+</script>
+</body>
+</html>
