@@ -202,22 +202,10 @@
     </div>
 
     <script>
-        // 카카오 REST API 설정
-        const KAKAO_CLIENT_ID = 'de1d687513aeb00f8a95712157bc6639';
-        const KAKAO_REDIRECT_URI = window.location.origin + '/api/auth/kakao/callback';
-        const KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize';
-
-        // 카카오 로그인 - REST API 방식
+        // Spring Security OAuth2를 사용한 카카오 로그인
         function loginWithKakao() {
-            const params = new URLSearchParams({
-                client_id: KAKAO_CLIENT_ID,
-                redirect_uri: KAKAO_REDIRECT_URI,
-                response_type: 'code',
-                scope: 'profile_nickname,account_email'
-            });
-
-            // 카카오 인가 페이지로 리다이렉트
-            window.location.href = `${KAKAO_AUTH_URL}?${params.toString()}`;
+            // Spring Security OAuth2가 자동으로 카카오 로그인 처리
+            window.location.href = '/oauth2/authorization/kakao';
         }
 
         // 페이지 로드 시 애니메이션

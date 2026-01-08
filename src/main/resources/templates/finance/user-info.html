@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 금융 정보</title>
     <link rel="stylesheet" th:href="@{/css/finance.css}">
+    <script th:src="@{/js/auth-api.js}"></script>
 </head>
 <body>
 <div class="container">
@@ -12,7 +13,7 @@
         <h1>내 금융 정보</h1>
         <div class="user-info">
             <span th:text="${username}">사용자</span>
-            <a href="/api/auth/logout" class="btn-logout">로그아웃</a>
+            <button onclick="handleLogout()" class="btn-logout">로그아웃</button>
         </div>
     </header>
 
@@ -99,5 +100,25 @@
         </section>
     </div>
 </div>
+
+<script th:inline="javascript">
+    // 세션 기반 인증: 별도의 토큰 저장 불필요
+    // 세션 쿠키가 자동으로 관리됨
+
+    // 로그아웃 핸들러
+    async function handleLogout() {
+        await AuthAPI.logout();
+    }
+
+    // 페이지 로드 시 세션 유효성 검증 (선택적)
+    window.addEventListener('DOMContentLoaded', async function() {
+        const isValid = await AuthAPI.validateSession();
+        if (!isValid) {
+            console.log('세션이 유효하지 않습니다.');
+            // 필요시 로그인 페이지로 리다이렉트
+            // window.location.href = '/login';
+        }
+    });
+</script>
 </body>
 </html>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>계좌 추가</title>
     <link rel="stylesheet" th:href="@{/css/finance.css}">
+    <script th:src="@{/js/auth-api.js}"></script>
 </head>
 <body>
 <div class="container">
@@ -79,13 +80,7 @@
         };
 
         try {
-            const response = await fetch('/api/v1/bank-accounts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
+            const response = await AuthAPI.post('/api/v1/bank-accounts', formData);
 
             if (response.ok) {
                 alert('계좌가 추가되었습니다.');
