@@ -79,7 +79,16 @@ public class CardService {
     @Transactional
     public CardResponse updateCard(UpdateCardCommand command) {
         Card card = getCardById(command.getUserId(), command.getCardId());
-        card.updateInfo(command.getCardName(), command.getColor(), command.getMemo());
+        card.updateFullInfo(
+                command.getCardName(),
+                command.getCardCompany(),
+                command.getCardType(),
+                command.getBalance(),
+                command.getCreditLimit(),
+                command.getIsActive(),
+                command.getColor(),
+                command.getMemo()
+        );
 
         String maskedCardNumber = getMaskedCardNumber(card);
         return CardResponse.from(card, maskedCardNumber);

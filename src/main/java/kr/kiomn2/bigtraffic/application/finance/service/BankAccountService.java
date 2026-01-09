@@ -84,7 +84,15 @@ public class BankAccountService {
     @Transactional
     public BankAccountResponse updateBankAccount(UpdateBankAccountCommand command) {
         BankAccount bankAccount = getBankAccountById(command.getUserId(), command.getAccountId());
-        bankAccount.updateInfo(command.getAccountName(), command.getColor(), command.getMemo());
+        bankAccount.updateFullInfo(
+                command.getAccountName(),
+                command.getBankName(),
+                command.getAccountType(),
+                command.getBalance(),
+                command.getIsActive(),
+                command.getColor(),
+                command.getMemo()
+        );
 
         String maskedAccountNumber = getMaskedAccountNumber(bankAccount);
         return BankAccountResponse.from(bankAccount, maskedAccountNumber);

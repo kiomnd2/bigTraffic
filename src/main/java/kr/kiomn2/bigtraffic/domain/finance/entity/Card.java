@@ -112,6 +112,35 @@ public class Card {
         }
     }
 
+    public void updateFullInfo(String cardName, String cardCompany, CardType cardType,
+                               BigDecimal balance, BigDecimal creditLimit, Boolean isActive,
+                               String color, String memo) {
+        if (cardName != null) {
+            this.cardName = cardName;
+        }
+        if (cardCompany != null) {
+            this.cardCompany = cardCompany;
+        }
+        if (cardType != null) {
+            this.cardType = cardType;
+        }
+        if (balance != null) {
+            this.balance = balance;
+        }
+        if (creditLimit != null) {
+            this.creditLimit = creditLimit;
+        }
+        if (isActive != null) {
+            this.isActive = isActive;
+        }
+        if (color != null) {
+            this.color = color;
+        }
+        if (memo != null) {
+            this.memo = memo;
+        }
+    }
+
     public void deactivate() {
         this.isActive = false;
     }

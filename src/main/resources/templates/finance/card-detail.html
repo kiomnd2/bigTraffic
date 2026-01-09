@@ -87,7 +87,7 @@
 
                     <div class="form-group">
                         <label for="cardNumber">카드번호 *</label>
-                        <input type="text" id="cardNumber" th:value="${card.cardNumber}" required>
+                        <input type="text" id="cardNumber" th:value="${card.cardNumber}" readonly>
                     </div>
 
                     <div class="form-group">
@@ -227,7 +227,6 @@
         const formData = {
             cardName: document.getElementById('cardName').value,
             cardCompany: document.getElementById('cardCompany').value,
-            cardNumber: document.getElementById('cardNumber').value,
             cardType: cardType,
             color: document.getElementById('color').value,
             isActive: document.getElementById('isActive').checked

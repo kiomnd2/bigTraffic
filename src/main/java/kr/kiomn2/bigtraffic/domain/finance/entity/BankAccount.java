@@ -93,6 +93,31 @@ public class BankAccount {
         }
     }
 
+    public void updateFullInfo(String accountName, String bankName, AccountType accountType,
+                               BigDecimal balance, Boolean isActive, String color, String memo) {
+        if (accountName != null) {
+            this.accountName = accountName;
+        }
+        if (bankName != null) {
+            this.bankName = bankName;
+        }
+        if (accountType != null) {
+            this.accountType = accountType;
+        }
+        if (balance != null) {
+            this.balance = balance;
+        }
+        if (isActive != null) {
+            this.isActive = isActive;
+        }
+        if (color != null) {
+            this.color = color;
+        }
+        if (memo != null) {
+            this.memo = memo;
+        }
+    }
+
     public void deactivate() {
         this.isActive = false;
     }
