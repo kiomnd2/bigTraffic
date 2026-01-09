@@ -41,7 +41,7 @@
                     <a href="/finance/add-account" class="btn-primary">첫 계좌 등록하기</a>
                 </div>
 
-                <div th:each="account : ${accounts}" class="finance-card">
+                <a th:each="account : ${accounts}" th:href="@{/finance/account/{id}(id=${account.id})}" class="finance-card finance-card-link">
                     <div class="card-header">
                         <div class="card-color" th:style="'background-color: ' + ${account.color}"></div>
                         <h3 th:text="${account.accountName}">계좌명</h3>
@@ -57,7 +57,7 @@
                             0원
                         </p>
                     </div>
-                </div>
+                </a>
             </div>
         </section>
 
@@ -74,7 +74,7 @@
                     <a href="/finance/add-card" class="btn-primary">첫 카드 등록하기</a>
                 </div>
 
-                <div th:each="card : ${cards}" class="finance-card">
+                <a th:each="card : ${cards}" th:href="@{/finance/card/{id}(id=${card.id})}" class="finance-card finance-card-link">
                     <div class="card-header">
                         <div class="card-color" th:style="'background-color: ' + ${card.color}"></div>
                         <h3 th:text="${card.cardName}">카드명</h3>
@@ -95,7 +95,7 @@
                             <span th:text="'한도: ' + ${#numbers.formatDecimal(card.creditLimit, 0, 'COMMA', 0, 'POINT')} + '원'">한도</span>
                         </p>
                     </div>
-                </div>
+                </a>
             </div>
         </section>
     </div>

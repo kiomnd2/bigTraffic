@@ -1,0 +1,458 @@
+/* 전체 레이아웃 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+}
+
+/* 헤더 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-info span {
+    font-size: 16px;
+    color: #666;
+}
+
+/* 버튼 */
+.btn-logout,
+.btn-back {
+    padding: 10px 20px;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-logout:hover,
+.btn-back:hover {
+    background: #e0e0e0;
+}
+
+.btn-add {
+    padding: 10px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-add:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    padding: 12px 30px;
+    background: #f5f5f5;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+/* 요약 섹션 */
+.summary-section {
+    margin-bottom: 40px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+}
+
+.summary-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.total-amount {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+/* 섹션 */
+.accounts-section,
+.cards-section {
+    margin-bottom: 40px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* 카드 리스트 */
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.finance-card {
+    background: white;
+    border: 2px solid #f0f0f0;
+    border-radius: 15px;
+    padding: 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: block;
+}
+
+.finance-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+}
+
+/* 링크된 카드 */
+.finance-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.finance-card-link:visited {
+    color: inherit;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.card-color {
+    width: 8px;
+    height: 40px;
+    border-radius: 4px;
+}
+
+.card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    flex: 1;
+}
+
+.badge-default {
+    padding: 4px 12px;
+    background: #667eea;
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.card-body {
+    margin-bottom: 15px;
+}
+
+.card-body p {
+    margin: 8px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.bank-name,
+.card-company {
+    font-weight: 600;
+    color: #333;
+}
+
+.account-number,
+.card-number {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.card-footer {
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.balance,
+.credit-info {
+    font-size: 24px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.credit-info span {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 빈 메시지 */
+.empty-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-message p {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+/* 폼 */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.required {
+    color: #e53e3e;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.color-picker {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.color-picker input[type="color"] {
+    width: 60px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.color-preview {
+    display: inline-block;
+    width: 100px;
+    height: 40px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 40px;
+}
+
+/* 상세 페이지 */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.detail-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.detail-view,
+.detail-edit {
+    background: white;
+}
+
+.detail-card {
+    border: 2px solid #f0f0f0;
+    border-radius: 15px;
+    padding: 30px;
+}
+
+.detail-info {
+    margin: 30px 0;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row label {
+    font-weight: 600;
+    color: #666;
+    font-size: 14px;
+}
+
+.info-row span {
+    font-size: 16px;
+    color: #333;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    padding: 12px 30px;
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    background: #c53030;
+}
+
+.edit-form {
+    border: 2px solid #f0f0f0;
+    border-radius: 15px;
+    padding: 30px;
+}
+
+.edit-form input[type="color"] {
+    width: 60px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .card-list {
+        grid-template-columns: 1fr;
+    }
+
+    .total-amount {
+        font-size: 32px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}

@@ -70,8 +70,10 @@ public class CardService {
 
     public CardResponse getCard(GetCardQuery query) {
         Card card = getCardById(query.getUserId(), query.getCardId());
+        String decryptedCardNumber = encryptor.decrypt(card.getCardNumber());
         String maskedCardNumber = getMaskedCardNumber(card);
-        return CardResponse.from(card, maskedCardNumber);
+        // 상세 조회 시에는 실제 카드번호 포함
+        return CardResponse.fromWithCardNumber(card, decryptedCardNumber, maskedCardNumber);
     }
 
     @Transactional

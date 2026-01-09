@@ -75,8 +75,10 @@ public class BankAccountService {
 
     public BankAccountResponse getBankAccount(GetBankAccountQuery query) {
         BankAccount bankAccount = getBankAccountById(query.getUserId(), query.getAccountId());
+        String decryptedAccountNumber = encryptor.decrypt(bankAccount.getAccountNumber());
         String maskedAccountNumber = getMaskedAccountNumber(bankAccount);
-        return BankAccountResponse.from(bankAccount, maskedAccountNumber);
+        // 상세 조회 시에는 실제 계좌번호 포함
+        return BankAccountResponse.fromWithAccountNumber(bankAccount, decryptedAccountNumber, maskedAccountNumber);
     }
 
     @Transactional

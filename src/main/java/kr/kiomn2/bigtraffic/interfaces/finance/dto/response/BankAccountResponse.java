@@ -17,6 +17,7 @@ public class BankAccountResponse {
     private Long id;
     private String accountName;
     private String bankName;
+    private String accountNumber; // 실제 계좌번호 (상세 페이지용)
     private String maskedAccountNumber;
     private String lastFourDigits;
     private AccountType accountType;
@@ -33,6 +34,28 @@ public class BankAccountResponse {
                 .id(account.getId())
                 .accountName(account.getAccountName())
                 .bankName(account.getBankName())
+                .maskedAccountNumber(maskedAccountNumber)
+                .lastFourDigits(account.getLastFourDigits())
+                .accountType(account.getAccountType())
+                .balance(account.getBalance())
+                .isDefault(account.getIsDefault())
+                .isActive(account.getIsActive())
+                .color(account.getColor())
+                .memo(account.getMemo())
+                .createdAt(account.getCreatedAt())
+                .updatedAt(account.getUpdatedAt())
+                .build();
+    }
+
+    /**
+     * 실제 계좌번호를 포함한 상세 정보용 Response 생성
+     */
+    public static BankAccountResponse fromWithAccountNumber(BankAccount account, String accountNumber, String maskedAccountNumber) {
+        return BankAccountResponse.builder()
+                .id(account.getId())
+                .accountName(account.getAccountName())
+                .bankName(account.getBankName())
+                .accountNumber(accountNumber) // 실제 번호 포함
                 .maskedAccountNumber(maskedAccountNumber)
                 .lastFourDigits(account.getLastFourDigits())
                 .accountType(account.getAccountType())

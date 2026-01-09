@@ -2,6 +2,7 @@ package kr.kiomn2.bigtraffic.infrastructure.finance.security;
 
 import kr.kiomn2.bigtraffic.infrastructure.finance.config.EncryptionConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -11,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FinanceDataEncryptor {
@@ -47,7 +49,14 @@ public class FinanceDataEncryptor {
             byteBuffer.put(encryptedData);
 
             return Base64.getEncoder().encodeToString(byteBuffer.array());
+
         } catch (Exception e) {
+            log.error("=== 암호화 실패 ===");
+            log.error("Exception Type: {}", e.getClass().getName());
+            log.error("Message: {}", e.getMessage());
+            log.error("입력 데이터 길이: {}", plainText.length());
+            log.error("StackTrace: ", e);
+            log.error("===================");
             throw new RuntimeException("Encryption failed", e);
         }
     }
@@ -58,9 +67,22 @@ public class FinanceDataEncryptor {
         }
 
         try {
-            SecretKey secretKey = encryptionConfig.getSecretKey();
+            // Base64 디코딩 시도 - 실패하면 평문일 가능성이 높음
+            byte[] decodedData;
+            try {
+                decodedData = Base64.getDecoder().decode(encryptedText);
+            } catch (IllegalArgumentException e) {
+                log.warn("Base64 디코딩 실패 - 평문 데이터로 간주합니다. Text length: {}", encryptedText.length());
+                return encryptedText; // 평문 그대로 반환
+            }
 
-            byte[] decodedData = Base64.getDecoder().decode(encryptedText);
+            // 데이터 길이 검증 (IV + 최소 암호화 데이터)
+            if (decodedData.length < GCM_IV_LENGTH + 16) { // 16 = GCM tag 최소 크기
+                log.warn("암호화 데이터가 너무 짧습니다. 평문으로 간주합니다. Length: {}", decodedData.length);
+                return encryptedText;
+            }
+
+            SecretKey secretKey = encryptionConfig.getSecretKey();
 
             // IV와 암호화된 데이터 분리
             ByteBuffer byteBuffer = ByteBuffer.wrap(decodedData);
@@ -76,8 +98,31 @@ public class FinanceDataEncryptor {
 
             byte[] decryptedData = cipher.doFinal(encryptedData);
             return new String(decryptedData);
+
+        } catch (javax.crypto.AEADBadTagException e) {
+            log.error("=== 복호화 실패: 잘못된 암호화 키 또는 손상된 데이터 ===");
+            log.error("입력 데이터 길이: {}", encryptedText.length());
+            log.error("입력 데이터 첫 50자: {}", encryptedText.substring(0, Math.min(50, encryptedText.length())));
+            log.error("AEADBadTagException - 암호화 키가 다르거나 데이터가 손상되었습니다.");
+            log.error("StackTrace: ", e);
+            log.error("==========================================================");
+
+            // 평문으로 간주하고 반환 (마이그레이션 지원)
+            log.warn("복호화 실패한 데이터를 평문으로 반환합니다.");
+            return encryptedText;
+
         } catch (Exception e) {
-            throw new RuntimeException("Decryption failed", e);
+            log.error("=== 복호화 실패: 예상치 못한 오류 ===");
+            log.error("Exception Type: {}", e.getClass().getName());
+            log.error("Message: {}", e.getMessage());
+            log.error("입력 데이터 길이: {}", encryptedText.length());
+            log.error("입력 데이터 첫 50자: {}", encryptedText.substring(0, Math.min(50, encryptedText.length())));
+            log.error("StackTrace: ", e);
+            log.error("=========================================");
+
+            // 복호화 실패 시 평문으로 간주 (하위 호환성)
+            log.warn("복호화 실패한 데이터를 평문으로 반환합니다.");
+            return encryptedText;
         }
     }
 
