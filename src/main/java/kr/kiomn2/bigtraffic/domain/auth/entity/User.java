@@ -1,6 +1,7 @@
 package kr.kiomn2.bigtraffic.domain.auth.entity;
 
 import jakarta.persistence.*;
+import kr.kiomn2.bigtraffic.domain.auth.vo.Role;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -41,6 +42,11 @@ public class User implements UserDetails, OAuth2User {
     @Column(name = "profile_url", length = 500)
     private String profileUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private Role role = Role.USER;
+
     @Column(name = "last_login_date")
     private LocalDateTime lastLoginDate;
 
@@ -54,7 +60,14 @@ public class User implements UserDetails, OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        return Collections.singletonList(new SimpleGrantedAuthority(role.getKey()));
+    }
+
+    /**
+     * 관리자 권한 확인
+     */
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 
     @Override
