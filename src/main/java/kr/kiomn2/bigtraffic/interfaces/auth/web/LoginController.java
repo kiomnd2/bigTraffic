@@ -17,7 +17,7 @@ public class LoginController {
         // 인증된 사용자는 user-info로, 아니면 로그인 페이지로
         if (authentication != null && authentication.isAuthenticated()
                 && !authentication.getPrincipal().equals("anonymousUser")) {
-            return "redirect:/finance/user-info";
+            return "redirect:/dashboard";
         }
         return "redirect:/login";
     }

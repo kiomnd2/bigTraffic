@@ -51,7 +51,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             log.info("  - SessionId: {}", session.getId());
 
             // 로컬 사용자 정보 페이지로 리다이렉트
-            String targetUrl = "/finance/user-info";
+            String targetUrl = "/dashboard";
             log.info("리다이렉트 URL: {}", targetUrl);
 
             getRedirectStrategy().sendRedirect(request, response, targetUrl);

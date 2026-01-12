@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>대시보드</title>
     <link rel="stylesheet" th:href="@{/css/finance.css}">
-    <script th:src="@{/js/auth-api.js}"></script>
 </head>
 <body>
 <div class="container">
@@ -131,16 +130,45 @@
 
     // 로그아웃 핸들러
     async function handleLogout() {
-        await AuthAPI.logout();
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                console.error('로그아웃 실패:', response.status);
+                alert('로그아웃에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('로그아웃 중 오류:', error);
+            alert('로그아웃 중 오류가 발생했습니다.');
+        }
     }
 
     // 페이지 로드 시 세션 유효성 검증 (선택적)
     window.addEventListener('DOMContentLoaded', async function() {
-        const isValid = await AuthAPI.validateSession();
-        if (!isValid) {
-            console.log('세션이 유효하지 않습니다.');
-            // 필요시 로그인 페이지로 리다이렉트
-            // window.location.href = '/login';
+        try {
+            const response = await fetch('/api/auth/validate', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok && response.status === 401) {
+                console.log('세션이 유효하지 않습니다.');
+                // 필요시 로그인 페이지로 리다이렉트
+                // window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('세션 검증 중 오류:', error);
         }
     });
 </script>
