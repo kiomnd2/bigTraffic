@@ -2,7 +2,9 @@ package kr.kiomn2.bigtraffic.application.accountbook.service;
 
 import kr.kiomn2.bigtraffic.application.accountbook.command.CreateTransactionCommand;
 import kr.kiomn2.bigtraffic.application.accountbook.command.DeleteTransactionCommand;
+import kr.kiomn2.bigtraffic.application.accountbook.query.GetMonthlyCalendarQuery;
 import kr.kiomn2.bigtraffic.application.accountbook.query.GetTransactionQuery;
+import kr.kiomn2.bigtraffic.application.accountbook.query.GetTransactionsPagedQuery;
 import kr.kiomn2.bigtraffic.application.accountbook.query.GetTransactionsQuery;
 import kr.kiomn2.bigtraffic.application.finance.command.UpdateBalanceCommand;
 import kr.kiomn2.bigtraffic.application.finance.query.GetBankAccountQuery;
@@ -17,16 +19,23 @@ import kr.kiomn2.bigtraffic.infrastructure.accountbook.repository.CategoryReposi
 import kr.kiomn2.bigtraffic.infrastructure.accountbook.repository.TransactionRepository;
 import kr.kiomn2.bigtraffic.infrastructure.finance.repository.BankAccountRepository;
 import kr.kiomn2.bigtraffic.infrastructure.finance.repository.CardRepository;
+import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.DailyTransactionSummary;
+import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.MonthlyCalendarResponse;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.TransactionResponse;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.BankAccountResponse;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.CardResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 거래 서비스
@@ -214,5 +223,88 @@ public class TransactionService {
 
         transactionRepository.delete(transaction);
         log.info("거래 삭제 완료 - transactionId: {}", command.getTransactionId());
+    }
+
+    /**
+     * 거래 목록 조회 (페이징 지원)
+     */
+    public Page<TransactionResponse> getTransactionsPaged(GetTransactionsPagedQuery query) {
+        Page<Transaction> transactionsPage = transactionRepository.findByDynamicConditionsWithPaging(
+                query.getUserId(), query.getType(), query.getCategoryId(),
+                query.getStartDate(), query.getEndDate(),
+                query.getAccountId(), query.getCardId(),
+                query.getPageable()
+        );
+
+        return transactionsPage.map(TransactionResponse::from);
+    }
+
+    /**
+     * 월별 캘린더 데이터 조회
+     * 날짜별 거래 요약 및 월별 합계 제공
+     */
+    public MonthlyCalendarResponse getMonthlyCalendar(GetMonthlyCalendarQuery query) {
+        LocalDate startDate = LocalDate.of(query.getYear(), query.getMonth(), 1);
+        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+
+        log.debug("월별 캘린더 조회 - userId: {}, year: {}, month: {}, range: {} ~ {}",
+                query.getUserId(), query.getYear(), query.getMonth(), startDate, endDate);
+
+        // 해당 월의 모든 거래 조회
+        List<Transaction> transactions = transactionRepository.findByUserIdAndDateBetween(
+                query.getUserId(), startDate, endDate
+        );
+
+        // 날짜별로 그룹화
+        Map<LocalDate, List<Transaction>> groupedByDate = transactions.stream()
+                .collect(Collectors.groupingBy(Transaction::getTransactionDate));
+
+        // 일별 요약 생성
+        List<DailyTransactionSummary> dailySummaries = groupedByDate.entrySet().stream()
+                .map(entry -> {
+                    LocalDate date = entry.getKey();
+                    List<Transaction> dayTransactions = entry.getValue();
+
+                    BigDecimal income = dayTransactions.stream()
+                            .filter(t -> t.getType() == TransactionType.INCOME)
+                            .map(Transaction::getAmount)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    BigDecimal expense = dayTransactions.stream()
+                            .filter(t -> t.getType() == TransactionType.EXPENSE)
+                            .map(Transaction::getAmount)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return DailyTransactionSummary.builder()
+                            .date(date)
+                            .transactionCount(dayTransactions.size())
+                            .dailyIncome(income)
+                            .dailyExpense(expense)
+                            .dailyNet(income.subtract(expense))
+                            .build();
+                })
+                .sorted(Comparator.comparing(DailyTransactionSummary::getDate))
+                .toList();
+
+        // 월별 합계 계산
+        BigDecimal monthlyIncome = dailySummaries.stream()
+                .map(DailyTransactionSummary::getDailyIncome)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal monthlyExpense = dailySummaries.stream()
+                .map(DailyTransactionSummary::getDailyExpense)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        log.debug("월별 캘린더 조회 완료 - 거래 일수: {}, 월 수입: {}, 월 지출: {}",
+                dailySummaries.size(), monthlyIncome, monthlyExpense);
+
+        return MonthlyCalendarResponse.builder()
+                .year(query.getYear())
+                .month(query.getMonth())
+                .dailySummaries(dailySummaries)
+                .monthlyIncome(monthlyIncome)
+                .monthlyExpense(monthlyExpense)
+                .monthlyNet(monthlyIncome.subtract(monthlyExpense))
+                .build();
     }
 }

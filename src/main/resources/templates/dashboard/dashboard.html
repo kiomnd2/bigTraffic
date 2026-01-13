@@ -120,6 +120,21 @@
                     </a>
                 </div>
             </div>
+
+            <!-- 가계부 섹션 -->
+            <div class="partition-subsection">
+                <div class="section-header">
+                    <h3>최근 거래</h3>
+                    <a href="/ledger" class="btn-add">전체보기</a>
+                </div>
+
+                <div id="recentTransactions" class="transaction-preview">
+                    <!-- Recent transactions will be loaded here -->
+                    <div class="empty-message">
+                        <p>거래 내역을 불러오는 중...</p>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 </div>
@@ -151,7 +166,7 @@
         }
     }
 
-    // 페이지 로드 시 세션 유효성 검증 (선택적)
+    // 페이지 로드 시 세션 유효성 검증 및 최근 거래 로드
     window.addEventListener('DOMContentLoaded', async function() {
         try {
             const response = await fetch('/api/auth/validate', {
@@ -170,7 +185,80 @@
         } catch (error) {
             console.error('세션 검증 중 오류:', error);
         }
+
+        // 최근 거래 로드
+        await loadRecentTransactions();
     });
+
+    // Load recent 5 transactions
+    async function loadRecentTransactions() {
+        try {
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const startDate = formatDate(firstDayOfMonth);
+            const endDate = formatDate(today);
+
+            const response = await fetch(
+                `/api/v1/transactions/paged?page=0&size=5&startDate=${startDate}&endDate=${endDate}`,
+                { credentials: 'include' }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                renderRecentTransactions(data.content);
+            }
+        } catch (error) {
+            console.error('Failed to load recent transactions:', error);
+            document.getElementById('recentTransactions').innerHTML =
+                '<div class="empty-message"><p>거래 내역을 불러올 수 없습니다.</p></div>';
+        }
+    }
+
+    function renderRecentTransactions(transactions) {
+        const container = document.getElementById('recentTransactions');
+
+        if (transactions.length === 0) {
+            container.innerHTML = '<div class="empty-message"><p>이번 달 거래 내역이 없습니다.</p></div>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        transactions.forEach(t => {
+            const card = document.createElement('a');
+            card.className = `transaction-preview-card ${t.type.toLowerCase()}`;
+            card.href = `/ledger/transaction/${t.id}`;
+
+            card.innerHTML = `
+                <div class="transaction-preview-info">
+                    <span class="type-badge ${t.type.toLowerCase()}">${t.type === 'INCOME' ? '수입' : '지출'}</span>
+                    <span class="description">${t.description || '내역 없음'}</span>
+                    <span class="date">${formatTransactionDate(t.transactionDate)}</span>
+                </div>
+                <div class="transaction-preview-amount ${t.type.toLowerCase()}">
+                    ${t.type === 'INCOME' ? '+' : '-'}${formatCurrency(t.amount)}원
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatTransactionDate(dateStr) {
+        const date = new Date(dateStr);
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('ko-KR').format(amount);
+    }
 </script>
 </body>
 </html>

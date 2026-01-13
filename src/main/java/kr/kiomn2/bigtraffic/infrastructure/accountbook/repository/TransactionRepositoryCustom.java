@@ -2,6 +2,8 @@ package kr.kiomn2.bigtraffic.infrastructure.accountbook.repository;
 
 import kr.kiomn2.bigtraffic.domain.accountbook.entity.Transaction;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,5 +33,29 @@ public interface TransactionRepositoryCustom {
             LocalDate endDate,
             Long accountId,
             Long cardId
+    );
+
+    /**
+     * 동적 조건으로 거래 목록 조회 (페이징 지원)
+     *
+     * @param userId 사용자 ID
+     * @param type 거래 유형 (nullable)
+     * @param categoryId 카테고리 ID (nullable)
+     * @param startDate 시작 날짜 (nullable)
+     * @param endDate 종료 날짜 (nullable)
+     * @param accountId 계좌 ID (nullable)
+     * @param cardId 카드 ID (nullable)
+     * @param pageable 페이징 정보
+     * @return 페이징된 거래 목록
+     */
+    Page<Transaction> findByDynamicConditionsWithPaging(
+            Long userId,
+            TransactionType type,
+            Long categoryId,
+            LocalDate startDate,
+            LocalDate endDate,
+            Long accountId,
+            Long cardId,
+            Pageable pageable
     );
 }

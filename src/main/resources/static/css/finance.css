@@ -577,3 +577,399 @@ body {
         padding: 20px;
     }
 }
+
+/* ==================== */
+/* Ledger (가계부) Styles */
+/* ==================== */
+
+/* Calendar Grid */
+.calendar-grid {
+    margin-bottom: 40px;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 2px;
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.day-label {
+    text-align: center;
+    font-weight: 600;
+    color: #666;
+    padding: 10px 0;
+}
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    background: #f0f0f0;
+    padding: 2px;
+    border-radius: 8px;
+}
+
+.calendar-cell {
+    background: white;
+    min-height: 100px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.calendar-cell.empty {
+    cursor: default;
+    background: #fafafa;
+}
+
+.calendar-cell:not(.empty):hover {
+    background: #f5f5ff;
+    transform: scale(1.02);
+}
+
+.calendar-cell.has-transactions {
+    background: #f0f8ff;
+    border: 2px solid #667eea;
+}
+
+.calendar-cell.selected {
+    background: #e6f0ff;
+    box-shadow: 0 0 0 3px #667eea;
+}
+
+.day-number {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.day-summary {
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.day-summary .income {
+    color: #10b981;
+    font-weight: 500;
+}
+
+.day-summary .expense {
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.day-summary .net {
+    color: #6366f1;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Ledger Summary */
+.ledger-summary {
+    margin-bottom: 30px;
+}
+
+.ledger-summary .summary-card {
+    display: flex;
+    justify-content: space-around;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px;
+    border-radius: 15px;
+    color: white;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item .label {
+    display: block;
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.summary-item .amount {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.summary-item.income .amount {
+    color: #a7f3d0;
+}
+
+.summary-item.expense .amount {
+    color: #fca5a5;
+}
+
+.summary-item.net .amount {
+    color: #ffffff;
+}
+
+/* Month Navigation */
+.month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+}
+
+.btn-nav {
+    padding: 10px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-nav:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+}
+
+/* Transaction Filters */
+.transaction-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.transaction-filters select {
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Transaction List */
+.transaction-list {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+}
+
+.transaction-date-group {
+    margin-bottom: 30px;
+}
+
+.date-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.transaction-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border: 2px solid #f0f0f0;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+}
+
+.transaction-card:hover {
+    border-color: #667eea;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.transaction-card.income {
+    border-left: 4px solid #10b981;
+}
+
+.transaction-card.expense {
+    border-left: 4px solid #ef4444;
+}
+
+.transaction-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex: 1;
+}
+
+.type-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.type-badge.income {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.type-badge.expense {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.transaction-card .description {
+    font-weight: 500;
+    color: #333;
+}
+
+.transaction-card .payment-method {
+    font-size: 13px;
+    color: #666;
+}
+
+.transaction-amount {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.transaction-amount.income {
+    color: #10b981;
+}
+
+.transaction-amount.expense {
+    color: #ef4444;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.page-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.page-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.page-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* Transaction Preview (Dashboard) */
+.transaction-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.transaction-preview-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+}
+
+.transaction-preview-card:hover {
+    border-color: #667eea;
+    transform: translateX(3px);
+}
+
+.transaction-preview-card.income {
+    border-left: 3px solid #10b981;
+}
+
+.transaction-preview-card.expense {
+    border-left: 3px solid #ef4444;
+}
+
+.transaction-preview-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.transaction-preview-info .description {
+    font-weight: 500;
+    color: #333;
+}
+
+.transaction-preview-info .date {
+    font-size: 12px;
+    color: #999;
+}
+
+.transaction-preview-amount {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.transaction-preview-amount.income {
+    color: #10b981;
+}
+
+.transaction-preview-amount.expense {
+    color: #ef4444;
+}
+
+/* Mobile Responsive for Ledger */
+@media (max-width: 768px) {
+    .calendar-cell {
+        min-height: 80px;
+        padding: 5px;
+    }
+
+    .day-number {
+        font-size: 14px;
+    }
+
+    .day-summary {
+        font-size: 9px;
+    }
+
+    .ledger-summary .summary-card {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .transaction-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .transaction-amount {
+        align-self: flex-end;
+    }
+}

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가계부</title>
+    <link rel="stylesheet" th:href="@{/css/finance.css}">
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="btn-back">← 대시보드</a>
+            <h1>가계부</h1>
+        </div>
+        <div class="user-info">
+            <span th:text="${username}">사용자</span>
+        </div>
+    </header>
+
+    <div class="content">
+        <!-- Monthly Summary Card -->
+        <section class="ledger-summary">
+            <div class="summary-card">
+                <div class="summary-item income">
+                    <span class="label">수입</span>
+                    <span class="amount" id="monthlyIncome">0원</span>
+                </div>
+                <div class="summary-item expense">
+                    <span class="label">지출</span>
+                    <span class="amount" id="monthlyExpense">0원</span>
+                </div>
+                <div class="summary-item net">
+                    <span class="label">순액</span>
+                    <span class="amount" id="monthlyNet">0원</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Month Navigation -->
+        <section class="month-navigation">
+            <button id="prevMonth" class="btn-nav">← 이전 달</button>
+            <h2 id="currentMonthTitle">2024년 1월</h2>
+            <button id="nextMonth" class="btn-nav">다음 달 →</button>
+        </section>
+
+        <!-- Calendar Grid -->
+        <section class="calendar-grid">
+            <div class="calendar-header">
+                <div class="day-label">일</div>
+                <div class="day-label">월</div>
+                <div class="day-label">화</div>
+                <div class="day-label">수</div>
+                <div class="day-label">목</div>
+                <div class="day-label">금</div>
+                <div class="day-label">토</div>
+            </div>
+            <div class="calendar-body" id="calendarBody">
+                <!-- Calendar cells will be dynamically generated -->
+            </div>
+        </section>
+
+        <!-- Filter Controls -->
+        <section class="transaction-filters">
+            <select id="filterType">
+                <option value="">전체 유형</option>
+                <option value="INCOME">수입</option>
+                <option value="EXPENSE">지출</option>
+            </select>
+            <select id="filterCategory">
+                <option value="">전체 카테고리</option>
+                <option th:each="cat : ${categories}"
+                        th:value="${cat.id}"
+                        th:text="${cat.name}">카테고리</option>
+            </select>
+            <button id="applyFilters" class="btn-primary">필터 적용</button>
+            <a href="/ledger/add-transaction" class="btn-add">+ 거래 추가</a>
+        </section>
+
+        <!-- Transaction List -->
+        <section class="transaction-list">
+            <h3>거래 내역</h3>
+            <div id="transactionContainer">
+                <!-- Transactions will be dynamically loaded -->
+                <div class="empty-message">
+                    <p>거래 내역을 불러오는 중...</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be dynamically generated -->
+            </div>
+        </section>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let currentYear = /*[[${currentYear}]]*/ 2024;
+    let currentMonth = /*[[${currentMonth}]]*/ 1;
+    let currentPage = 0;
+    const pageSize = 20;
+    let selectedDate = null;
+    let calendarData = null;
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        loadCalendarData();
+        loadTransactions();
+    });
+
+    // Month navigation handlers
+    document.getElementById('prevMonth').addEventListener('click', function() {
+        currentMonth--;
+        if (currentMonth < 1) {
+            currentMonth = 12;
+            currentYear--;
+        }
+        selectedDate = null;
+        loadCalendarData();
+        loadTransactions();
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', function() {
+        currentMonth++;
+        if (currentMonth > 12) {
+            currentMonth = 1;
+            currentYear++;
+        }
+        selectedDate = null;
+        loadCalendarData();
+        loadTransactions();
+    });
+
+    // Load calendar data
+    async function loadCalendarData() {
+        try {
+            const response = await fetch(
+                `/api/v1/transactions/calendar/${currentYear}/${currentMonth}`,
+                { credentials: 'include' }
+            );
+
+            if (response.ok) {
+                calendarData = await response.json();
+                renderCalendar();
+                updateMonthlySummary();
+            } else {
+                console.error('캘린더 로드 실패:', response.status);
+            }
+        } catch (error) {
+            console.error('Calendar load error:', error);
+        }
+    }
+
+    // Render calendar grid
+    function renderCalendar() {
+        const firstDay = new Date(currentYear, currentMonth - 1, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+        document.getElementById('currentMonthTitle').textContent =
+            `${currentYear}년 ${currentMonth}월`;
+
+        const calendarBody = document.getElementById('calendarBody');
+        calendarBody.innerHTML = '';
+
+        // Empty cells before first day
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendar-cell empty';
+            calendarBody.appendChild(emptyCell);
+        }
+
+        // Create daily summaries map
+        const summariesByDate = {};
+        if (calendarData && calendarData.dailySummaries) {
+            calendarData.dailySummaries.forEach(summary => {
+                const day = new Date(summary.date).getDate();
+                summariesByDate[day] = summary;
+            });
+        }
+
+        // Days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell';
+
+            const summary = summariesByDate[day];
+            const hasTransactions = summary && summary.transactionCount > 0;
+
+            if (hasTransactions) {
+                cell.classList.add('has-transactions');
+            }
+
+            cell.innerHTML = `
+                <div class="day-number">${day}</div>
+                ${hasTransactions ? `
+                    <div class="day-summary">
+                        <div class="income">+${formatCurrency(summary.dailyIncome)}</div>
+                        <div class="expense">-${formatCurrency(summary.dailyExpense)}</div>
+                        <div class="net">${formatCurrency(summary.dailyNet)}</div>
+                    </div>
+                ` : ''}
+            `;
+
+            cell.addEventListener('click', function() {
+                selectedDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                currentPage = 0;
+                loadTransactions();
+
+                // Highlight selected cell
+                document.querySelectorAll('.calendar-cell').forEach(c => c.classList.remove('selected'));
+                cell.classList.add('selected');
+            });
+
+            calendarBody.appendChild(cell);
+        }
+    }
+
+    // Update monthly summary
+    function updateMonthlySummary() {
+        if (calendarData) {
+            document.getElementById('monthlyIncome').textContent =
+                formatCurrency(calendarData.monthlyIncome) + '원';
+            document.getElementById('monthlyExpense').textContent =
+                formatCurrency(calendarData.monthlyExpense) + '원';
+            document.getElementById('monthlyNet').textContent =
+                formatCurrency(calendarData.monthlyNet) + '원';
+        }
+    }
+
+    // Load transactions with pagination
+    async function loadTransactions() {
+        try {
+            const filterType = document.getElementById('filterType').value;
+            const filterCategory = document.getElementById('filterCategory').value;
+
+            const startDate = selectedDate || `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+            const lastDay = new Date(currentYear, currentMonth, 0).getDate();
+            const endDate = selectedDate || `${currentYear}-${String(currentMonth).padStart(2, '0')}-${lastDay}`;
+
+            let url = `/api/v1/transactions/paged?page=${currentPage}&size=${pageSize}&startDate=${startDate}&endDate=${endDate}`;
+
+            if (filterType) url += `&type=${filterType}`;
+            if (filterCategory) url += `&categoryId=${filterCategory}`;
+
+            const response = await fetch(url, { credentials: 'include' });
+
+            if (response.ok) {
+                const data = await response.json();
+                renderTransactions(data.content);
+                renderPagination(data.totalPages, data.number);
+            } else {
+                console.error('거래 목록 로드 실패:', response.status);
+            }
+        } catch (error) {
+            console.error('Transaction load error:', error);
+        }
+    }
+
+    // Render transaction list
+    function renderTransactions(transactions) {
+        const container = document.getElementById('transactionContainer');
+
+        if (transactions.length === 0) {
+            container.innerHTML = '<div class="empty-message"><p>거래 내역이 없습니다.</p></div>';
+            return;
+        }
+
+        // Group by date
+        const groupedByDate = {};
+        transactions.forEach(t => {
+            const date = t.transactionDate;
+            if (!groupedByDate[date]) {
+                groupedByDate[date] = [];
+            }
+            groupedByDate[date].push(t);
+        });
+
+        container.innerHTML = '';
+
+        Object.keys(groupedByDate).sort().reverse().forEach(date => {
+            const dateGroup = document.createElement('div');
+            dateGroup.className = 'transaction-date-group';
+            dateGroup.innerHTML = `<h4 class="date-header">${formatDate(date)}</h4>`;
+
+            groupedByDate[date].forEach(t => {
+                const transactionCard = document.createElement('a');
+                transactionCard.className = `transaction-card ${t.type.toLowerCase()}`;
+                transactionCard.href = `/ledger/transaction/${t.id}`;
+
+                transactionCard.innerHTML = `
+                    <div class="transaction-info">
+                        <span class="type-badge ${t.type.toLowerCase()}">${t.type === 'INCOME' ? '수입' : '지출'}</span>
+                        <span class="description">${t.description || '내역 없음'}</span>
+                        <span class="payment-method">${formatPaymentMethod(t.paymentMethod)}</span>
+                    </div>
+                    <div class="transaction-amount ${t.type.toLowerCase()}">
+                        ${t.type === 'INCOME' ? '+' : '-'}${formatCurrency(t.amount)}원
+                    </div>
+                `;
+
+                dateGroup.appendChild(transactionCard);
+            });
+
+            container.appendChild(dateGroup);
+        });
+    }
+
+    // Render pagination
+    function renderPagination(totalPages, currentPageNum) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        for (let i = 0; i < totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.className = i === currentPageNum ? 'page-btn active' : 'page-btn';
+            btn.textContent = i + 1;
+            btn.addEventListener('click', function() {
+                currentPage = i;
+                loadTransactions();
+            });
+            pagination.appendChild(btn);
+        }
+    }
+
+    // Filter apply handler
+    document.getElementById('applyFilters').addEventListener('click', function() {
+        currentPage = 0;
+        selectedDate = null;
+        document.querySelectorAll('.calendar-cell').forEach(c => c.classList.remove('selected'));
+        loadTransactions();
+    });
+
+    // Utility functions
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('ko-KR').format(amount);
+    }
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return `${date.getMonth() + 1}월 ${date.getDate()}일 (${['일', '월', '화', '수', '목', '금', '토'][date.getDay()]})`;
+    }
+
+    function formatPaymentMethod(method) {
+        const methods = { ACCOUNT: '계좌', CARD: '카드', CASH: '현금' };
+        return methods[method] || method;
+    }
+</script>
+</body>
+</html>
