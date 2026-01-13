@@ -44,94 +44,104 @@
             </div>
         </section>
 
-        <!-- 금융자산 파티션 -->
-        <section class="dashboard-partition">
-            <div class="partition-header">
-                <h2>나의 금융자산</h2>
-            </div>
+        <!-- 탭 네비게이션 -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="finance-tab">금융자산</button>
+            <button class="tab-btn" data-tab="ledger-tab">가계부</button>
+        </div>
 
-            <!-- 계좌 섹션 -->
-            <div class="partition-subsection">
-                <div class="section-header">
-                    <h3>내 계좌</h3>
-                    <a href="/finance/add-account" class="btn-add">+ 계좌 추가</a>
+        <!-- 금융자산 탭 -->
+        <section id="finance-tab" class="tab-content active">
+            <div class="dashboard-partition">
+                <div class="partition-header">
+                    <h2>나의 금융자산</h2>
                 </div>
 
-                <div class="card-list">
-                    <div th:if="${#lists.isEmpty(accounts)}" class="empty-message">
-                        <p>등록된 계좌가 없습니다.</p>
-                        <a href="/finance/add-account" class="btn-primary">첫 계좌 등록하기</a>
+                <!-- 계좌 및 카드 통합 섹션 -->
+                <div class="partition-subsection">
+                    <div class="section-header">
+                        <h3>계좌 및 카드</h3>
+                        <div class="finance-actions">
+                            <a href="/finance/add-account" class="btn-add-small">+ 계좌</a>
+                            <a href="/finance/add-card" class="btn-add-small">+ 카드</a>
+                        </div>
                     </div>
 
-                    <a th:each="account : ${accounts}" th:href="@{/finance/account/{id}(id=${account.id})}" class="finance-card finance-card-link">
-                        <div class="card-header">
-                            <div class="card-color" th:style="'background-color: ' + ${account.color}"></div>
-                            <h3 th:text="${account.accountName}">계좌명</h3>
-                            <span th:if="${account.isDefault}" class="badge-default">기본</span>
+                    <div class="card-list-compact">
+                        <!-- 빈 메시지 -->
+                        <div th:if="${#lists.isEmpty(accounts) && #lists.isEmpty(cards)}" class="empty-message">
+                            <p>등록된 계좌 또는 카드가 없습니다.</p>
                         </div>
-                        <div class="card-body">
-                            <p class="bank-name" th:text="${account.bankName}">은행명</p>
-                            <p class="account-number" th:text="${account.maskedAccountNumber}">****-****-****</p>
-                            <p class="account-type" th:text="${account.accountType}">계좌 유형</p>
-                        </div>
-                        <div class="card-footer">
-                            <p class="balance" th:text="${#numbers.formatDecimal(account.balance, 0, 'COMMA', 0, 'POINT')} + '원'">
-                                0원
-                            </p>
-                        </div>
-                    </a>
+
+                        <!-- 계좌 카드 -->
+                        <a th:each="account : ${accounts}" th:href="@{/finance/account/{id}(id=${account.id})}" class="finance-card-compact finance-card-link">
+                            <div class="card-header-compact">
+                                <div class="card-color-compact" th:style="'background-color: ' + ${account.color}"></div>
+                                <div class="card-title-section">
+                                    <h4 th:text="${account.accountName}">계좌명</h4>
+                                    <span class="finance-type-badge">계좌</span>
+                                    <span th:if="${account.isDefault}" class="badge-default-small">기본</span>
+                                </div>
+                            </div>
+                            <div class="card-body-compact">
+                                <p class="bank-name-compact" th:text="${account.bankName}">은행명</p>
+                                <p class="account-number-compact" th:text="${account.maskedAccountNumber}">****-****-****</p>
+                            </div>
+                            <div class="card-footer-compact">
+                                <p class="balance-compact" th:text="${#numbers.formatDecimal(account.balance, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                    0원
+                                </p>
+                            </div>
+                        </a>
+
+                        <!-- 카드 -->
+                        <a th:each="card : ${cards}" th:href="@{/finance/card/{id}(id=${card.id})}" class="finance-card-compact finance-card-link">
+                            <div class="card-header-compact">
+                                <div class="card-color-compact" th:style="'background-color: ' + ${card.color}"></div>
+                                <div class="card-title-section">
+                                    <h4 th:text="${card.cardName}">카드명</h4>
+                                    <span class="finance-type-badge">카드</span>
+                                    <span th:if="${card.isDefault}" class="badge-default-small">기본</span>
+                                </div>
+                            </div>
+                            <div class="card-body-compact">
+                                <p class="card-company-compact" th:text="${card.cardCompany}">카드사</p>
+                                <p class="card-number-compact" th:text="${card.maskedCardNumber}">****-****-****-****</p>
+                            </div>
+                            <div class="card-footer-compact" th:if="${card.cardType.toString() == 'DEBIT'}">
+                                <p class="balance-compact" th:text="${#numbers.formatDecimal(card.balance, 0, 'COMMA', 0, 'POINT')} + '원'">
+                                    0원
+                                </p>
+                            </div>
+                            <div class="card-footer-compact" th:if="${card.cardType.toString() == 'CREDIT'}">
+                                <p class="credit-info-compact">
+                                    <span th:text="'한도: ' + ${#numbers.formatDecimal(card.creditLimit, 0, 'COMMA', 0, 'POINT')} + '원'">한도</span>
+                                </p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <!-- 카드 섹션 -->
-            <div class="partition-subsection">
-                <div class="section-header">
-                    <h3>내 카드</h3>
-                    <a href="/finance/add-card" class="btn-add">+ 카드 추가</a>
+        <!-- 가계부 탭 -->
+        <section id="ledger-tab" class="tab-content">
+            <div class="dashboard-partition">
+                <div class="partition-header">
+                    <h2>최근 거래 내역</h2>
                 </div>
 
-                <div class="card-list">
-                    <div th:if="${#lists.isEmpty(cards)}" class="empty-message">
-                        <p>등록된 카드가 없습니다.</p>
-                        <a href="/finance/add-card" class="btn-primary">첫 카드 등록하기</a>
+                <div class="partition-subsection">
+                    <div class="section-header">
+                        <h3>이번 달 거래</h3>
+                        <a href="/ledger" class="btn-add">전체보기</a>
                     </div>
 
-                    <a th:each="card : ${cards}" th:href="@{/finance/card/{id}(id=${card.id})}" class="finance-card finance-card-link">
-                        <div class="card-header">
-                            <div class="card-color" th:style="'background-color: ' + ${card.color}"></div>
-                            <h3 th:text="${card.cardName}">카드명</h3>
-                            <span th:if="${card.isDefault}" class="badge-default">기본</span>
+                    <div id="recentTransactions" class="transaction-preview">
+                        <!-- Recent transactions will be loaded here -->
+                        <div class="empty-message">
+                            <p>거래 내역을 불러오는 중...</p>
                         </div>
-                        <div class="card-body">
-                            <p class="card-company" th:text="${card.cardCompany}">카드사</p>
-                            <p class="card-number" th:text="${card.maskedCardNumber}">****-****-****-****</p>
-                            <p class="card-type" th:text="${card.cardType}">카드 유형</p>
-                        </div>
-                        <div class="card-footer" th:if="${card.cardType.toString() == 'DEBIT'}">
-                            <p class="balance" th:text="${#numbers.formatDecimal(card.balance, 0, 'COMMA', 0, 'POINT')} + '원'">
-                                0원
-                            </p>
-                        </div>
-                        <div class="card-footer" th:if="${card.cardType.toString() == 'CREDIT'}">
-                            <p class="credit-info">
-                                <span th:text="'한도: ' + ${#numbers.formatDecimal(card.creditLimit, 0, 'COMMA', 0, 'POINT')} + '원'">한도</span>
-                            </p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-            <!-- 가계부 섹션 -->
-            <div class="partition-subsection">
-                <div class="section-header">
-                    <h3>최근 거래</h3>
-                    <a href="/ledger" class="btn-add">전체보기</a>
-                </div>
-
-                <div id="recentTransactions" class="transaction-preview">
-                    <!-- Recent transactions will be loaded here -->
-                    <div class="empty-message">
-                        <p>거래 내역을 불러오는 중...</p>
                     </div>
                 </div>
             </div>
@@ -142,6 +152,31 @@
 <script th:inline="javascript">
     // 세션 기반 인증: 별도의 토큰 저장 불필요
     // 세션 쿠키가 자동으로 관리됨
+
+    // 탭 전환 기능
+    function initTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+
+                // 모든 탭 버튼과 컨텐츠에서 active 클래스 제거
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                // 클릭한 탭 버튼과 해당 컨텐츠에 active 클래스 추가
+                btn.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+
+                // 가계부 탭으로 전환 시 거래 내역 로드
+                if (targetTab === 'ledger-tab') {
+                    loadRecentTransactions();
+                }
+            });
+        });
+    }
 
     // 로그아웃 핸들러
     async function handleLogout() {
@@ -166,8 +201,10 @@
         }
     }
 
-    // 페이지 로드 시 세션 유효성 검증 및 최근 거래 로드
+    // 페이지 로드 시 세션 유효성 검증 및 탭 초기화
     window.addEventListener('DOMContentLoaded', async function() {
+        // 탭 기능 초기화
+        initTabs();
         try {
             const response = await fetch('/api/auth/validate', {
                 method: 'GET',
@@ -185,9 +222,6 @@
         } catch (error) {
             console.error('세션 검증 중 오류:', error);
         }
-
-        // 최근 거래 로드
-        await loadRecentTransactions();
     });
 
     // Load recent 5 transactions
