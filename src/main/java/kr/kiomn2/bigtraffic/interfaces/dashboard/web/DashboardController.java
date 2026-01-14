@@ -44,6 +44,7 @@ public class DashboardController {
             model.addAttribute("cards", dashboard.getCards());
             model.addAttribute("username", dashboard.getUsername());
             model.addAttribute("email", dashboard.getEmail());
+            model.addAttribute("isAdmin", user.isAdmin());
 
             log.info("대시보드 페이지 렌더링 완료 - userId: {}", user.getId());
             return "dashboard/dashboard";
