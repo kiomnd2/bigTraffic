@@ -161,4 +161,17 @@ public class AccountBookWebController {
             return "error";
         }
     }
+
+    /**
+     * 카테고리 관리 페이지
+     */
+    @GetMapping("/categories")
+    public String categoryMain(@AuthenticationPrincipal User user, Model model) {
+        log.info("카테고리 관리 페이지 접근 - userId: {}", user.getId());
+
+        model.addAttribute("username", user.getName());
+        model.addAttribute("transactionTypes", TransactionType.values());
+
+        return "ledger/category-main";
+    }
 }

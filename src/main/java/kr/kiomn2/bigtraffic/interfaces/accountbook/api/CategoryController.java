@@ -13,17 +13,14 @@ import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.request.CategoryUpdateReq
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.CategoryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 /**
  * 가계부 카테고리 API 컨트롤러
- * 카테고리 등록/수정/삭제는 관리자만 가능
  */
 @Slf4j
 @RestController
@@ -34,23 +31,13 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     /**
-     * 관리자 권한 체크
-     */
-    private void checkAdminRole(User user) {
-        if (!user.isAdmin()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "관리자만 접근할 수 있습니다.");
-        }
-    }
-
-    /**
-     * 카테고리 생성 (관리자 전용)
+     * 카테고리 생성
      */
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(
             @AuthenticationPrincipal User user,
             @RequestBody CategoryCreateRequest request
     ) {
-        checkAdminRole(user);
         CreateCategoryCommand command = CreateCategoryCommand.from(user.getId(), request);
         CategoryResponse response = categoryService.createCategory(command);
         return ResponseEntity.ok(response);
@@ -84,7 +71,7 @@ public class CategoryController {
     }
 
     /**
-     * 카테고리 수정 (관리자 전용)
+     * 카테고리 수정
      */
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(
@@ -92,21 +79,19 @@ public class CategoryController {
             @PathVariable Long id,
             @RequestBody CategoryUpdateRequest request
     ) {
-        checkAdminRole(user);
         UpdateCategoryCommand command = UpdateCategoryCommand.from(user.getId(), id, request);
         CategoryResponse response = categoryService.updateCategory(command);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * 카테고리 삭제 (관리자 전용, 비활성화)
+     * 카테고리 삭제 (비활성화)
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
-        checkAdminRole(user);
         DeleteCategoryCommand command = new DeleteCategoryCommand(user.getId(), id);
         categoryService.deleteCategory(command);
         return ResponseEntity.noContent().build();
