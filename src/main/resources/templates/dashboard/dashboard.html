@@ -48,6 +48,7 @@
         <div class="tab-navigation">
             <button class="tab-btn active" data-tab="finance-tab">금융자산</button>
             <button class="tab-btn" data-tab="ledger-tab">가계부</button>
+            <button th:if="${isAdmin}" class="tab-btn" data-tab="category-tab">카테고리 관리</button>
         </div>
 
         <!-- 금융자산 탭 -->
@@ -142,6 +143,31 @@
                         <div class="empty-message">
                             <p>거래 내역을 불러오는 중...</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 카테고리 관리 탭 (ADMIN 전용) -->
+        <section th:if="${isAdmin}" id="category-tab" class="tab-content">
+            <div class="dashboard-partition">
+                <div class="partition-header">
+                    <h2>카테고리 관리</h2>
+                    <a href="/category" class="btn-add">전체 관리</a>
+                </div>
+
+                <div class="partition-subsection">
+                    <div class="section-header">
+                        <h3>관리자 전용 기능</h3>
+                    </div>
+
+                    <div class="empty-message">
+                        <p>카테고리 관리는 관리자만 접근할 수 있습니다.</p>
+                        <p style="margin-top: 12px;">
+                            <a href="/category" style="color: #1976d2; text-decoration: none; font-weight: 600;">
+                                카테고리 관리 페이지로 이동 →
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>

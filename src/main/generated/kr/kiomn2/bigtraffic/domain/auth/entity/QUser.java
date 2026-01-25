@@ -33,6 +33,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath providerId = createString("providerId");
 
+    public final EnumPath<kr.kiomn2.bigtraffic.domain.auth.vo.Role> role = createEnum("role", kr.kiomn2.bigtraffic.domain.auth.vo.Role.class);
+
     public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     public final StringPath username = createString("username");
