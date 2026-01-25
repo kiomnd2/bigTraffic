@@ -1,6 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.finance.entity;
 
 import jakarta.persistence.*;
+import kr.kiomn2.bigtraffic.application.finance.command.CreateCardCommand;
+import kr.kiomn2.bigtraffic.application.finance.command.UpdateCardCommand;
 import kr.kiomn2.bigtraffic.domain.finance.vo.CardType;
 import kr.kiomn2.bigtraffic.infrastructure.finance.security.CardNumberConverter;
 import lombok.*;
@@ -112,32 +114,30 @@ public class Card {
         }
     }
 
-    public void updateFullInfo(String cardName, String cardCompany, CardType cardType,
-                               BigDecimal balance, BigDecimal creditLimit, Boolean isActive,
-                               String color, String memo) {
-        if (cardName != null) {
-            this.cardName = cardName;
+    public void updateFullInfo(UpdateCardCommand command) {
+        if (command.getCardName() != null) {
+            this.cardName = command.getCardName();
         }
-        if (cardCompany != null) {
-            this.cardCompany = cardCompany;
+        if (command.getCardCompany() != null) {
+            this.cardCompany = command.getCardCompany();
         }
-        if (cardType != null) {
-            this.cardType = cardType;
+        if (command.getCardType() != null) {
+            this.cardType = command.getCardType();
         }
-        if (balance != null) {
-            this.balance = balance;
+        if (command.getBalance() != null) {
+            this.balance = command.getBalance();
         }
-        if (creditLimit != null) {
-            this.creditLimit = creditLimit;
+        if (command.getCreditLimit() != null) {
+            this.creditLimit = command.getCreditLimit();
         }
-        if (isActive != null) {
-            this.isActive = isActive;
+        if (command.getIsActive() != null) {
+            this.isActive = command.getIsActive();
         }
-        if (color != null) {
-            this.color = color;
+        if (command.getColor() != null) {
+            this.color = command.getColor();
         }
-        if (memo != null) {
-            this.memo = memo;
+        if (command.getMemo() != null) {
+            this.memo = command.getMemo();
         }
     }
 
@@ -149,8 +149,7 @@ public class Card {
         this.isActive = true;
     }
 
-    public static Card create(String cardNumber, String lastFourDigits,
-                              kr.kiomn2.bigtraffic.application.finance.command.CreateCardCommand command) {
+    public static Card create(String cardNumber, String lastFourDigits, CreateCardCommand command) {
         return Card.builder()
                 .userId(command.getUserId())
                 .cardName(command.getCardName())

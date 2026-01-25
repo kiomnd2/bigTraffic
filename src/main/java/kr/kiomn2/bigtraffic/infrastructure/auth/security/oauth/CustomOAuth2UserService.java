@@ -1,5 +1,6 @@
 package kr.kiomn2.bigtraffic.infrastructure.auth.security.oauth;
 
+import kr.kiomn2.bigtraffic.application.accountbook.service.CategoryService;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import kr.kiomn2.bigtraffic.infrastructure.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
     private final List<OauthUserProcessor> oauthUserProcessors;
+    private final CategoryService categoryService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -72,6 +74,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
                             user.updateLastLoginDate();
                             User savedUser = userRepository.save(user);
+
+                            // 신규 사용자에게 기본 카테고리 생성
+                            try {
+                                categoryService.createDefaultCategories(savedUser.getId());
+                                log.info("신규 사용자 기본 카테고리 생성 완료 - userId: {}", savedUser.getId());
+                            } catch (Exception e) {
+                                log.error("기본 카테고리 생성 실패 - userId: {}", savedUser.getId(), e);
+                                // 기본 카테고리 생성 실패해도 로그인은 진행
+                            }
 
                             log.info("신규 사용자 등록 완료");
                             log.info("  - UserId: {}", savedUser.getId());

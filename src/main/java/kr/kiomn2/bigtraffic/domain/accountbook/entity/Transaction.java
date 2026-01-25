@@ -1,6 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.accountbook.entity;
 
 import jakarta.persistence.*;
+import kr.kiomn2.bigtraffic.application.accountbook.command.CreateTransactionCommand;
+import kr.kiomn2.bigtraffic.application.accountbook.command.UpdateTransactionCommand;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.PaymentMethod;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import lombok.*;
@@ -67,46 +69,42 @@ public class Transaction {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public void updateInfo(BigDecimal amount, Long categoryId, String description,
-                          LocalDate transactionDate, PaymentMethod paymentMethod,
-                          Long accountId, Long cardId, String memo) {
-        if (amount != null) {
-            this.amount = amount;
+    public void updateInfo(UpdateTransactionCommand command) {
+        if (command.getAmount() != null) {
+            this.amount = command.getAmount();
         }
-        if (categoryId != null) {
-            this.categoryId = categoryId;
+        if (command.getCategoryId() != null) {
+            this.categoryId = command.getCategoryId();
         }
-        if (description != null) {
-            this.description = description;
+        if (command.getDescription() != null) {
+            this.description = command.getDescription();
         }
-        if (transactionDate != null) {
-            this.transactionDate = transactionDate;
+        if (command.getTransactionDate() != null) {
+            this.transactionDate = command.getTransactionDate();
         }
-        if (paymentMethod != null) {
-            this.paymentMethod = paymentMethod;
+        if (command.getPaymentMethod() != null) {
+            this.paymentMethod = command.getPaymentMethod();
         }
         // accountId와 cardId는 null 허용
-        this.accountId = accountId;
-        this.cardId = cardId;
-        if (memo != null) {
-            this.memo = memo;
+        this.accountId = command.getAccountId();
+        this.cardId = command.getCardId();
+        if (command.getMemo() != null) {
+            this.memo = command.getMemo();
         }
     }
 
-    public static Transaction create(Long userId, TransactionType type, BigDecimal amount,
-                                    Long categoryId, String description, LocalDate transactionDate,
-                                    PaymentMethod paymentMethod, Long accountId, Long cardId, String memo) {
+    public static Transaction create(CreateTransactionCommand command) {
         return Transaction.builder()
-                .userId(userId)
-                .type(type)
-                .amount(amount)
-                .categoryId(categoryId)
-                .description(description)
-                .transactionDate(transactionDate)
-                .paymentMethod(paymentMethod)
-                .accountId(accountId)
-                .cardId(cardId)
-                .memo(memo)
+                .userId(command.getUserId())
+                .type(command.getType())
+                .amount(command.getAmount())
+                .categoryId(command.getCategoryId())
+                .description(command.getDescription())
+                .transactionDate(command.getTransactionDate())
+                .paymentMethod(command.getPaymentMethod())
+                .accountId(command.getAccountId())
+                .cardId(command.getCardId())
+                .memo(command.getMemo())
                 .build();
     }
 }

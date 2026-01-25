@@ -1,6 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.accountbook.entity;
 
 import jakarta.persistence.*;
+import kr.kiomn2.bigtraffic.application.accountbook.command.CreateCategoryCommand;
+import kr.kiomn2.bigtraffic.application.accountbook.command.UpdateCategoryCommand;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -56,15 +58,15 @@ public class Category {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public void updateInfo(String name, String color, String icon) {
-        if (name != null) {
-            this.name = name;
+    public void updateInfo(UpdateCategoryCommand command) {
+        if (command.getName() != null) {
+            this.name = command.getName();
         }
-        if (color != null) {
-            this.color = color;
+        if (command.getColor() != null) {
+            this.color = command.getColor();
         }
-        if (icon != null) {
-            this.icon = icon;
+        if (command.getIcon() != null) {
+            this.icon = command.getIcon();
         }
     }
 
@@ -87,13 +89,13 @@ public class Category {
                 .build();
     }
 
-    public static Category createCustom(Long userId, String name, TransactionType type, String color, String icon) {
+    public static Category createCustom(CreateCategoryCommand command) {
         return Category.builder()
-                .userId(userId)
-                .name(name)
-                .type(type)
-                .color(color)
-                .icon(icon)
+                .userId(command.getUserId())
+                .name(command.getName())
+                .type(command.getType())
+                .color(command.getColor())
+                .icon(command.getIcon())
                 .isDefault(false)
                 .isActive(true)
                 .build();

@@ -12,7 +12,6 @@ import kr.kiomn2.bigtraffic.application.finance.query.GetCardQuery;
 import kr.kiomn2.bigtraffic.application.finance.service.BankAccountService;
 import kr.kiomn2.bigtraffic.application.finance.service.CardService;
 import kr.kiomn2.bigtraffic.domain.accountbook.entity.Transaction;
-import kr.kiomn2.bigtraffic.domain.accountbook.vo.PaymentMethod;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import kr.kiomn2.bigtraffic.domain.finance.entity.Card;
 import kr.kiomn2.bigtraffic.infrastructure.accountbook.repository.CategoryRepository;
@@ -70,20 +69,12 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다."));
 
         // 거래 생성
-        Transaction transaction = Transaction.create(
-                command.getUserId(), command.getType(), command.getAmount(),
-                command.getCategoryId(), command.getDescription(),
-                command.getTransactionDate(), command.getPaymentMethod(),
-                command.getAccountId(), command.getCardId(), command.getMemo()
-        );
+        Transaction transaction = Transaction.create(command);
 
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // 결제 수단에 따른 잔액/사용금액 업데이트
-        updatePaymentMethodBalance(
-                command.getUserId(), command.getType(), command.getAmount(),
-                command.getPaymentMethod(), command.getAccountId(), command.getCardId()
-        );
+        updatePaymentMethodBalance(command);
 
         log.info("거래 생성 완료 - transactionId: {}", savedTransaction.getId());
         return TransactionResponse.from(savedTransaction);
@@ -92,17 +83,10 @@ public class TransactionService {
     /**
      * 결제 수단별 잔액/사용금액 업데이트
      */
-    private void updatePaymentMethodBalance(
-            Long userId,
-            TransactionType type,
-            BigDecimal amount,
-            PaymentMethod paymentMethod,
-            Long accountId,
-            Long cardId
-    ) {
-        switch (paymentMethod) {
-            case ACCOUNT -> updateAccountBalance(userId, type, amount, accountId);
-            case CARD -> updateCardBalance(userId, type, amount, cardId);
+    private void updatePaymentMethodBalance(CreateTransactionCommand command) {
+        switch (command.getPaymentMethod()) {
+            case ACCOUNT -> updateAccountBalance(command);
+            case CARD -> updateCardBalance(command);
             case CASH -> log.debug("현금 거래 - 별도 잔액 업데이트 없음");
         }
     }
@@ -112,27 +96,27 @@ public class TransactionService {
      * INCOME: 잔액 증가
      * EXPENSE: 잔액 감소
      */
-    private void updateAccountBalance(Long userId, TransactionType type, BigDecimal amount, Long accountId) {
-        if (accountId == null) {
+    private void updateAccountBalance(CreateTransactionCommand command) {
+        if (command.getAccountId() == null) {
             throw new RuntimeException("계좌 결제 시 accountId가 필요합니다.");
         }
 
         BankAccountResponse account = bankAccountService.getBankAccount(
-                new GetBankAccountQuery(userId, accountId)
+                new GetBankAccountQuery(command.getUserId(), command.getAccountId())
         );
 
         BigDecimal newBalance;
-        if (type == TransactionType.INCOME) {
-            newBalance = account.getBalance().add(amount);
+        if (command.getType() == TransactionType.INCOME) {
+            newBalance = account.getBalance().add(command.getAmount());
             log.debug("계좌 수입 - accountId: {}, 이전 잔액: {}, 추가 금액: {}, 새 잔액: {}",
-                    accountId, account.getBalance(), amount, newBalance);
+                    command.getAccountId(), account.getBalance(), command.getAmount(), newBalance);
         } else {
-            newBalance = account.getBalance().subtract(amount);
+            newBalance = account.getBalance().subtract(command.getAmount());
             log.debug("계좌 지출 - accountId: {}, 이전 잔액: {}, 차감 금액: {}, 새 잔액: {}",
-                    accountId, account.getBalance(), amount, newBalance);
+                    command.getAccountId(), account.getBalance(), command.getAmount(), newBalance);
         }
 
-        bankAccountService.updateBalance(new UpdateBalanceCommand(userId, accountId, newBalance));
+        bankAccountService.updateBalance(new UpdateBalanceCommand(command.getUserId(), command.getAccountId(), newBalance));
     }
 
     /**
@@ -140,42 +124,42 @@ public class TransactionService {
      * 체크카드: INCOME(잔액 증가), EXPENSE(잔액 감소)
      * 신용카드: EXPENSE(사용금액 증가)
      */
-    private void updateCardBalance(Long userId, TransactionType type, BigDecimal amount, Long cardId) {
-        if (cardId == null) {
+    private void updateCardBalance(CreateTransactionCommand command) {
+        if (command.getCardId() == null) {
             throw new RuntimeException("카드 결제 시 cardId가 필요합니다.");
         }
 
-        CardResponse card = cardService.getCard(new GetCardQuery(userId, cardId));
+        CardResponse card = cardService.getCard(new GetCardQuery(command.getUserId(), command.getCardId()));
 
         if ("DEBIT".equals(card.getCardType().toString())) {
             // 체크카드: 잔액 증감
             BigDecimal newBalance;
-            if (type == TransactionType.INCOME) {
-                newBalance = card.getBalance().add(amount);
+            if (command.getType() == TransactionType.INCOME) {
+                newBalance = card.getBalance().add(command.getAmount());
                 log.debug("체크카드 수입 - cardId: {}, 이전 잔액: {}, 추가 금액: {}, 새 잔액: {}",
-                        cardId, card.getBalance(), amount, newBalance);
+                        command.getCardId(), card.getBalance(), command.getAmount(), newBalance);
             } else {
-                newBalance = card.getBalance().subtract(amount);
+                newBalance = card.getBalance().subtract(command.getAmount());
                 log.debug("체크카드 지출 - cardId: {}, 이전 잔액: {}, 차감 금액: {}, 새 잔액: {}",
-                        cardId, card.getBalance(), amount, newBalance);
+                        command.getCardId(), card.getBalance(), command.getAmount(), newBalance);
             }
 
             // 카드 잔액 업데이트
-            Card cardEntity = cardRepository.findByIdAndUserId(cardId, userId)
+            Card cardEntity = cardRepository.findByIdAndUserId(command.getCardId(), command.getUserId())
                     .orElseThrow(() -> new RuntimeException("카드를 찾을 수 없습니다."));
             cardEntity.updateBalance(newBalance);
 
         } else if ("CREDIT".equals(card.getCardType().toString())) {
             // 신용카드: EXPENSE 시 사용금액 증가
-            if (type == TransactionType.EXPENSE) {
-                Card cardEntity = cardRepository.findByIdAndUserId(cardId, userId)
+            if (command.getType() == TransactionType.EXPENSE) {
+                Card cardEntity = cardRepository.findByIdAndUserId(command.getCardId(), command.getUserId())
                         .orElseThrow(() -> new RuntimeException("카드를 찾을 수 없습니다."));
 
                 BigDecimal currentUsed = cardEntity.getUsedAmount() != null ? cardEntity.getUsedAmount() : BigDecimal.ZERO;
-                BigDecimal newUsedAmount = currentUsed.add(amount);
+                BigDecimal newUsedAmount = currentUsed.add(command.getAmount());
 
                 log.debug("신용카드 지출 - cardId: {}, 이전 사용금액: {}, 추가 사용: {}, 새 사용금액: {}",
-                        cardId, currentUsed, amount, newUsedAmount);
+                        command.getCardId(), currentUsed, command.getAmount(), newUsedAmount);
 
                 cardEntity.updateUsedAmount(newUsedAmount);
             } else {

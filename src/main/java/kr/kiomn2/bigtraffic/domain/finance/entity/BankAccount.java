@@ -2,6 +2,7 @@ package kr.kiomn2.bigtraffic.domain.finance.entity;
 
 import jakarta.persistence.*;
 import kr.kiomn2.bigtraffic.application.finance.command.CreateBankAccountCommand;
+import kr.kiomn2.bigtraffic.application.finance.command.UpdateBankAccountCommand;
 import kr.kiomn2.bigtraffic.domain.finance.vo.AccountType;
 import kr.kiomn2.bigtraffic.infrastructure.finance.security.AccountNumberConverter;
 import lombok.*;
@@ -93,28 +94,27 @@ public class BankAccount {
         }
     }
 
-    public void updateFullInfo(String accountName, String bankName, AccountType accountType,
-                               BigDecimal balance, Boolean isActive, String color, String memo) {
-        if (accountName != null) {
-            this.accountName = accountName;
+    public void updateFullInfo(UpdateBankAccountCommand command) {
+        if (command.getAccountName() != null) {
+            this.accountName = command.getAccountName();
         }
-        if (bankName != null) {
-            this.bankName = bankName;
+        if (command.getBankName() != null) {
+            this.bankName = command.getBankName();
         }
-        if (accountType != null) {
-            this.accountType = accountType;
+        if (command.getAccountType() != null) {
+            this.accountType = command.getAccountType();
         }
-        if (balance != null) {
-            this.balance = balance;
+        if (command.getBalance() != null) {
+            this.balance = command.getBalance();
         }
-        if (isActive != null) {
-            this.isActive = isActive;
+        if (command.getIsActive() != null) {
+            this.isActive = command.getIsActive();
         }
-        if (color != null) {
-            this.color = color;
+        if (command.getColor() != null) {
+            this.color = command.getColor();
         }
-        if (memo != null) {
-            this.memo = memo;
+        if (command.getMemo() != null) {
+            this.memo = command.getMemo();
         }
     }
 
