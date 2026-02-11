@@ -1,95 +1,50 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 1. 프로젝트 개요
+카카오 OAuth 기반 개인 가계부 관리 웹 어플리케이션
+Spring Boot 3.5.8 + Java 21 + Thymeleaf SSR + Gradle (Kotlin DSL)
 
-## Project Overview
+## 2. 아키텍처 (DDD 4-Layer)
 
-**big-traffic** is a Spring Boot 3.5.8 web application built with Java 21 and Gradle. The project appears to be in early stages with minimal application code currently implemented.
-
-## Build and Development Commands
-
-### Building the Project
-```bash
-# Build the project
-./gradlew build
-
-# Build without running tests
-./gradlew build -x test
-
-# Clean build
-./gradlew clean build
+```
+interfaces/       → Controller, DTO (Request/Response)
+application/      → Facade, Command, Query, Service
+domain/           → Entity, Value Object, Service, Repository(interface)
+infrastructure/   → Repository(구현체), Config, Security
 ```
 
-### Running Tests
-```bash
-# Run all tests
-./gradlew test
+## 3. 의존 방향 (절대 규칙)
+- interfaces → application or domain
+- application → domain ← infrastructure
+- domain에서 application/infrastructure를 절대 의존하지 않는다
+- DIP: domain/{도메인}/{도메인}Repository(인터페이스) ← infrastructure/{도메인}/repository/{구현체}
 
-# Run a specific test class
-./gradlew test --tests "kr.kiomn2.bigtraffic.BigTrafficApplicationTests"
+## 4. 새 기능 추가 시 패키지 위치
+- Controller: `interfaces/{도메인}/api/`
+- Web Controller: `interfaces/{도메인}/web/`
+- DTO: `interfaces/{도메인}/dto/request/`, `interfaces/{도메인}/dto/response/`
+- Facade: `application/{도메인}/facade/`
+- Command/Query: `application/{도메인}/command/`, `application/{도메인}/query/`
+- Service: `application/{도메인}/service/`
+- Entity: `domain/{도메인}/entity/`
+- VO: `domain/{도메인}/vo/`
+- Exception: `domain/{도메인}/exception/`
+- Repository: `infrastructure/{도메인}/repository/`
 
-# Run tests with detailed output
-./gradlew test --info
-```
+## 5. API URL 패턴
+- REST API: `/api/v1/{리소스}`
+- 웹페이지: `/{도메인}/**`
 
-### Running the Application
-```bash
-# Run the Spring Boot application
-./gradlew bootRun
+## 6. 도메인 목록
+Auth, Finance, AccountBook, AccountGroup
+(상세 지식은 `/domain-auth`, `/domain-finance`, `/domain-accountbook`, `/domain-accountgroup` 참조)
 
-# Run with specific profile
-./gradlew bootRun --args='--spring.profiles.active=dev'
-```
+## 7. 변경 보고서
+- 모든 변경점에 대한 보고서를 작성하고 report 디렉토리에 report_yyyymmddHHmmss.md 파일로 작성한다
 
-### Docker Environment
-```bash
-# Start MySQL database
-docker-compose -f docker/docker-compose.yml up -d
-
-# Stop MySQL database
-docker-compose -f docker/docker-compose.yml down
-
-# View logs
-docker-compose -f docker/docker-compose.yml logs -f
-```
-
-## Architecture and Structure
-
-### Package Structure
-- **Base Package**: `kr.kiomn2` (note: package structure has been recently refactored from `kr.kiomn2.newsletter.bigtraffic`)
-- **Main Application**: `BigTrafficApplication.java` in `src/main/java/kr/kiomn2/`
-- **Tests**: Located in `src/test/java/kr/kiomn2/bigtraffic/` (note inconsistency with main package)
-
-### Technology Stack
-- **Framework**: Spring Boot 3.5.8
-- **Language**: Java 21
-- **Build Tool**: Gradle with Kotlin DSL
-- **Web**: Spring Web (REST APIs)
-- **Utilities**: Lombok for boilerplate reduction
-- **Database**: MySQL 5.7 (via Docker)
-- **Testing**: JUnit Platform with Spring Boot Test
-
-### Database Configuration
-The project uses MySQL 5.7 via Docker Compose:
-- **Host**: localhost:3306
-- **Database**: kiomnd2-db
-- **User**: kiomnd2
-- **Character Set**: utf8mb4 with utf8mb4_unicode_ci collation
-
-Database credentials are defined in `docker/docker-compose.yml`. Application database configuration should be added to `application.properties`.
-
-### Recent Package Refactoring
-The codebase has undergone a package restructuring:
-- Main application moved from `kr.kiomn2.newsletter.bigtraffic` to `kr.kiomn2.bigtraffic`
-- Test package path still references old structure (`kr.kiomn2.bigtraffic`)
-- This inconsistency should be noted when creating new packages or moving files
-
-## Development Notes
-
-### Windows Environment
-This project is developed on Windows (`win32`). Use `gradlew.bat` instead of `./gradlew` when running Gradle commands directly in Windows Command Prompt (though `./gradlew` works in Git Bash/WSL).
-
-### Gradle Configuration
-- Group ID: `kr.kiomn2.bigtraffic`
-- Version: `0.0.1`
-- Java Toolchain: Automatically downloads/uses Java 21
+## 8. Skills 안내
+- `/add-feature` - 새 기능 추가 가이드
+- `/domain-auth`, `/domain-finance`, `/domain-accountbook`, `/domain-accountgroup` - 도메인별 상세 지식
+- `/build` - 빌드/실행/Docker 명령어
+- `/check-arch` - 의존성 검증
+- `/commit` - 커밋 메시지 작성
