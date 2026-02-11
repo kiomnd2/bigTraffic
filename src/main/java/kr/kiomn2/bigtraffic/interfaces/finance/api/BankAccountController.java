@@ -3,25 +3,25 @@ package kr.kiomn2.bigtraffic.interfaces.finance.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import kr.kiomn2.bigtraffic.application.finance.command.CreateBankAccountCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.DeleteBankAccountCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.SetDefaultBankAccountCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.UpdateBalanceCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.UpdateBankAccountCommand;
-import kr.kiomn2.bigtraffic.application.finance.query.GetBankAccountQuery;
-import kr.kiomn2.bigtraffic.application.finance.query.GetBankAccountsQuery;
-import kr.kiomn2.bigtraffic.application.finance.service.BankAccountService;
+import kr.kiomn2.bigtraffic.domain.finance.command.*;
+import kr.kiomn2.bigtraffic.domain.finance.entity.BankAccount;
+import kr.kiomn2.bigtraffic.domain.finance.query.GetBankAccountQuery;
+import kr.kiomn2.bigtraffic.domain.finance.query.GetBankAccountsQuery;
+import kr.kiomn2.bigtraffic.domain.finance.service.BankAccountService;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.request.BalanceUpdateRequest;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.request.BankAccountCreateRequest;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.request.BankAccountUpdateRequest;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.BankAccountListResponse;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.BankAccountResponse;
+import kr.kiomn2.bigtraffic.interfaces.finance.mapper.BankAccountMapper;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Bank Account", description = "계좌 관리 API")
 @RestController
@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
+    private final BankAccountMapper bankAccountMapper;
 
     @Operation(summary = "계좌 등록", description = "새로운 은행 계좌를 등록합니다.")
     @PostMapping
@@ -39,9 +40,13 @@ public class BankAccountController {
 
         Long userId = user.getId();
 
-        CreateBankAccountCommand command = CreateBankAccountCommand.from(userId, request);
-        BankAccountResponse response = bankAccountService.createBankAccount(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        CreateBankAccountCommand command = new CreateBankAccountCommand(
+                userId, request.getAccountName(), request.getBankName(),
+                request.getAccountNumber(), request.getAccountType(),
+                request.getBalance(), request.getColor(), request.getMemo()
+        );
+        BankAccount account = bankAccountService.createBankAccount(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(bankAccountMapper.toResponse(account));
     }
 
     @Operation(summary = "계좌 목록 조회", description = "사용자의 계좌 목록을 조회합니다.")
@@ -53,9 +58,9 @@ public class BankAccountController {
         Long userId = user.getId();
 
         GetBankAccountsQuery query = new GetBankAccountsQuery(userId, isActive);
-        BankAccountListResponse response = bankAccountService.getBankAccounts(query);
+        List<BankAccount> accounts = bankAccountService.getBankAccounts(query);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bankAccountMapper.toListResponse(accounts));
     }
 
     @Operation(summary = "계좌 상세 조회", description = "특정 계좌의 상세 정보를 조회합니다.")
@@ -67,9 +72,9 @@ public class BankAccountController {
         Long userId = user.getId();
 
         GetBankAccountQuery query = new GetBankAccountQuery(userId, id);
-        BankAccountResponse response = bankAccountService.getBankAccount(query);
+        BankAccount account = bankAccountService.getBankAccount(query);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bankAccountMapper.toDetailResponse(account));
     }
 
     @Operation(summary = "계좌 수정", description = "계좌 정보를 수정합니다.")
@@ -81,9 +86,13 @@ public class BankAccountController {
 
         Long userId = user.getId();
 
-        UpdateBankAccountCommand command = UpdateBankAccountCommand.from(userId, id, request);
-        BankAccountResponse response = bankAccountService.updateBankAccount(command);
-        return ResponseEntity.ok(response);
+        UpdateBankAccountCommand command = new UpdateBankAccountCommand(
+                userId, id, request.getAccountName(), request.getBankName(),
+                request.getAccountType(), request.getBalance(),
+                request.getIsActive(), request.getColor(), request.getMemo()
+        );
+        BankAccount account = bankAccountService.updateBankAccount(command);
+        return ResponseEntity.ok(bankAccountMapper.toResponse(account));
     }
 
     @Operation(summary = "계좌 삭제", description = "계좌를 삭제합니다.")
@@ -109,9 +118,9 @@ public class BankAccountController {
         Long userId = user.getId();
 
         SetDefaultBankAccountCommand command = new SetDefaultBankAccountCommand(userId, id);
-        BankAccountResponse response = bankAccountService.setDefaultBankAccount(command);
+        BankAccount account = bankAccountService.setDefaultBankAccount(command);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bankAccountMapper.toResponse(account));
     }
 
     @Operation(summary = "잔액 업데이트", description = "계좌 잔액을 업데이트합니다.")
@@ -124,8 +133,8 @@ public class BankAccountController {
         Long userId = user.getId();
 
         UpdateBalanceCommand command = new UpdateBalanceCommand(userId, id, request.getBalance());
-        BankAccountResponse response = bankAccountService.updateBalance(command);
+        BankAccount account = bankAccountService.updateBalance(command);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(bankAccountMapper.toResponse(account));
     }
 }

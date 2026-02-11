@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카테고리 관리</title>
+    <link rel="stylesheet" th:href="@{/css/finance.css}">
+    <style>
+        /* 카테고리 관리 페이지 스타일 */
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .category-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .category-tab:hover {
+            border-color: #667eea;
+        }
+
+        .category-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .category-tab.income.active {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .category-tab.expense.active {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .category-card.inactive {
+            opacity: 0.5;
+            background: #fafafa;
+        }
+
+        .category-color {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .category-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-income {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-expense {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-default {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-inactive {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-edit:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .btn-close {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-close:hover {
+            background: #e0e0e0;
+        }
+
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .type-btn.income {
+            color: #10b981;
+        }
+
+        .type-btn.expense {
+            color: #ef4444;
+        }
+
+        .type-btn.income.selected {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .type-btn.expense.selected {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .category-tabs {
+                flex-direction: column;
+            }
+
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .category-card {
+                padding: 15px;
+            }
+
+            .category-color {
+                width: 40px;
+                height: 40px;
+            }
+
+            .modal {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="btn-back">← 대시보드</a>
+            <h1>카테고리 관리</h1>
+        </div>
+        <div class="user-info">
+            <span th:text="${username}">사용자</span>
+        </div>
+    </header>
+
+    <div class="content">
+        <!-- 카테고리 탭 -->
+        <div class="category-tabs">
+            <button class="category-tab active" data-type="ALL">전체</button>
+            <button class="category-tab income" data-type="INCOME">수입</button>
+            <button class="category-tab expense" data-type="EXPENSE">지출</button>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="section-header" style="margin-bottom: 20px;">
+            <h2 id="categoryCount">카테고리 목록</h2>
+            <button class="btn-add" onclick="openAddModal()">+ 카테고리 추가</button>
+        </div>
+
+        <!-- 카테고리 목록 -->
+        <div class="category-grid" id="categoryGrid">
+            <!-- 카테고리 카드가 동적으로 생성됩니다 -->
+        </div>
+
+        <div class="empty-message" id="emptyMessage" style="display: none;">
+            <p>등록된 카테고리가 없습니다.</p>
+            <button class="btn-primary" onclick="openAddModal()">첫 카테고리 추가하기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 카테고리 추가/수정 모달 -->
+<div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="modalTitle">카테고리 추가</h2>
+            <button class="btn-close" onclick="closeModal()">×</button>
+        </div>
+
+        <form id="categoryForm">
+            <input type="hidden" id="categoryId">
+
+            <div class="type-selector">
+                <button type="button" class="type-btn income" data-type="INCOME" onclick="selectType('INCOME')">수입</button>
+                <button type="button" class="type-btn expense selected" data-type="EXPENSE" onclick="selectType('EXPENSE')">지출</button>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryName">카테고리명 <span class="required">*</span></label>
+                <input type="text" id="categoryName" name="name" placeholder="예) 식비, 교통비" required>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryColor">색상</label>
+                <div class="color-picker">
+                    <input type="color" id="categoryColor" name="color" value="#667eea">
+                    <span class="color-preview" id="colorPreview"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryIcon">아이콘 (이모지)</label>
+                <input type="text" id="categoryIcon" name="icon" placeholder="예) 🍔, 🚗, 💰" maxlength="4">
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal()">취소</button>
+                <button type="submit" class="btn-primary" id="submitBtn">추가</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>카테고리 삭제</h2>
+            <button class="btn-close" onclick="closeDeleteModal()">×</button>
+        </div>
+        <p style="margin-bottom: 20px; color: #666;">이 카테고리를 삭제하시겠습니까? 삭제된 카테고리는 비활성화됩니다.</p>
+        <p style="margin-bottom: 30px; font-weight: 600;" id="deleteCategoryName"></p>
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeDeleteModal()">취소</button>
+            <button type="button" class="btn-danger" onclick="confirmDelete()">삭제</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let categories = [];
+    let currentFilter = 'ALL';
+    let editingCategoryId = null;
+    let deletingCategoryId = null;
+    let selectedType = 'EXPENSE';
+
+    // 페이지 로드 시 카테고리 목록 조회
+    window.addEventListener('DOMContentLoaded', function() {
+        loadCategories();
+        initColorPreview();
+    });
+
+    // 색상 미리보기 초기화
+    function initColorPreview() {
+        const colorInput = document.getElementById('categoryColor');
+        const colorPreview = document.getElementById('colorPreview');
+        colorPreview.style.backgroundColor = colorInput.value;
+
+        colorInput.addEventListener('input', function(e) {
+            colorPreview.style.backgroundColor = e.target.value;
+        });
+    }
+
+    // 카테고리 목록 조회
+    async function loadCategories() {
+        try {
+            const response = await fetch('/api/v1/categories', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                categories = await response.json();
+                renderCategories();
+            } else {
+                console.error('카테고리 목록 조회 실패:', response.status);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // 카테고리 렌더링
+    function renderCategories() {
+        const grid = document.getElementById('categoryGrid');
+        const emptyMessage = document.getElementById('emptyMessage');
+        const countElement = document.getElementById('categoryCount');
+
+        let filteredCategories = categories;
+        if (currentFilter !== 'ALL') {
+            filteredCategories = categories.filter(c => c.type === currentFilter);
+        }
+
+        countElement.textContent = `카테고리 목록 (${filteredCategories.length}개)`;
+
+        if (filteredCategories.length === 0) {
+            grid.style.display = 'none';
+            emptyMessage.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        emptyMessage.style.display = 'none';
+
+        grid.innerHTML = filteredCategories.map(category => `
+            <div class="category-card ${!category.isActive ? 'inactive' : ''}" onclick="openEditModal(${category.id})">
+                <div class="category-color" style="background-color: ${category.color || '#667eea'}">
+                    ${category.icon ? `<span style="font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%;">${category.icon}</span>` : ''}
+                </div>
+                <div class="category-info">
+                    <div class="category-name">${category.name}</div>
+                    <div class="category-badges">
+                        <span class="badge ${category.type === 'INCOME' ? 'badge-income' : 'badge-expense'}">
+                            ${category.type === 'INCOME' ? '수입' : '지출'}
+                        </span>
+                        ${category.isDefault ? '<span class="badge badge-default">기본</span>' : ''}
+                        ${!category.isActive ? '<span class="badge badge-inactive">비활성</span>' : ''}
+                    </div>
+                </div>
+                <div class="category-actions" onclick="event.stopPropagation()">
+                    <button class="btn-icon btn-edit" onclick="openEditModal(${category.id})" title="수정">✎</button>
+                    ${!category.isDefault ? `<button class="btn-icon btn-delete" onclick="openDeleteModal(${category.id}, '${category.name}')" title="삭제">✕</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // 탭 클릭 이벤트
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.type;
+            renderCategories();
+        });
+    });
+
+    // 타입 선택
+    function selectType(type) {
+        selectedType = type;
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.type === type);
+        });
+    }
+
+    // 추가 모달 열기
+    function openAddModal() {
+        editingCategoryId = null;
+        document.getElementById('modalTitle').textContent = '카테고리 추가';
+        document.getElementById('submitBtn').textContent = '추가';
+        document.getElementById('categoryForm').reset();
+        document.getElementById('categoryColor').value = '#667eea';
+        document.getElementById('colorPreview').style.backgroundColor = '#667eea';
+        selectType('EXPENSE');
+        document.getElementById('categoryModal').classList.add('active');
+    }
+
+    // 수정 모달 열기
+    function openEditModal(categoryId) {
+        const category = categories.find(c => c.id === categoryId);
+        if (!category) return;
+
+        editingCategoryId = categoryId;
+        document.getElementById('modalTitle').textContent = '카테고리 수정';
+        document.getElementById('submitBtn').textContent = '수정';
+        document.getElementById('categoryId').value = category.id;
+        document.getElementById('categoryName').value = category.name;
+        document.getElementById('categoryColor').value = category.color || '#667eea';
+        document.getElementById('colorPreview').style.backgroundColor = category.color || '#667eea';
+        document.getElementById('categoryIcon').value = category.icon || '';
+        selectType(category.type);
+        document.getElementById('categoryModal').classList.add('active');
+    }
+
+    // 모달 닫기
+    function closeModal() {
+        document.getElementById('categoryModal').classList.remove('active');
+        editingCategoryId = null;
+    }
+
+    // 삭제 모달 열기
+    function openDeleteModal(categoryId, categoryName) {
+        deletingCategoryId = categoryId;
+        document.getElementById('deleteCategoryName').textContent = categoryName;
+        document.getElementById('deleteModal').classList.add('active');
+    }
+
+    // 삭제 모달 닫기
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+        deletingCategoryId = null;
+    }
+
+    // 폼 제출
+    document.getElementById('categoryForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = {
+            name: document.getElementById('categoryName').value,
+            type: selectedType,
+            color: document.getElementById('categoryColor').value,
+            icon: document.getElementById('categoryIcon').value || null
+        };
+
+        try {
+            let response;
+            if (editingCategoryId) {
+                // 수정
+                response = await fetch(`/api/v1/categories/${editingCategoryId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+            } else {
+                // 추가
+                response = await fetch('/api/v1/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+            }
+
+            if (response.ok) {
+                closeModal();
+                loadCategories();
+                alert(editingCategoryId ? '카테고리가 수정되었습니다.' : '카테고리가 추가되었습니다.');
+            } else {
+                const error = await response.json();
+                alert('오류: ' + (error.message || '알 수 없는 오류'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('처리 중 오류가 발생했습니다.');
+        }
+    });
+
+    // 삭제 확인
+    async function confirmDelete() {
+        if (!deletingCategoryId) return;
+
+        try {
+            const response = await fetch(`/api/v1/categories/${deletingCategoryId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                closeDeleteModal();
+                loadCategories();
+                alert('카테고리가 삭제되었습니다.');
+            } else {
+                const error = await response.json();
+                alert('삭제 실패: ' + (error.message || '알 수 없는 오류'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('삭제 중 오류가 발생했습니다.');
+        }
+    }
+
+    // 모달 외부 클릭 시 닫기
+    document.getElementById('categoryModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+</script>
+</body>
+</html>

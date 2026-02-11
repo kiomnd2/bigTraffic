@@ -1,16 +1,18 @@
 package kr.kiomn2.bigtraffic.interfaces.accountbook.api;
 
-import kr.kiomn2.bigtraffic.application.accountbook.command.CreateCategoryCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.command.DeleteCategoryCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.command.UpdateCategoryCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.query.GetCategoriesQuery;
-import kr.kiomn2.bigtraffic.application.accountbook.query.GetCategoryQuery;
-import kr.kiomn2.bigtraffic.application.accountbook.service.CategoryService;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.CreateCategoryCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.DeleteCategoryCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.UpdateCategoryCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.entity.Category;
+import kr.kiomn2.bigtraffic.domain.accountbook.query.GetCategoriesQuery;
+import kr.kiomn2.bigtraffic.domain.accountbook.query.GetCategoryQuery;
+import kr.kiomn2.bigtraffic.domain.accountbook.service.CategoryService;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.request.CategoryCreateRequest;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.request.CategoryUpdateRequest;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.CategoryResponse;
+import kr.kiomn2.bigtraffic.interfaces.accountbook.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 가계부 카테고리 API 컨트롤러
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -29,23 +28,21 @@ import java.util.List;
 public class CategoryController {
 
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
-    /**
-     * 카테고리 생성
-     */
     @PostMapping
     public ResponseEntity<CategoryResponse> createCategory(
             @AuthenticationPrincipal User user,
             @RequestBody CategoryCreateRequest request
     ) {
-        CreateCategoryCommand command = CreateCategoryCommand.from(user.getId(), request);
-        CategoryResponse response = categoryService.createCategory(command);
-        return ResponseEntity.ok(response);
+        CreateCategoryCommand command = new CreateCategoryCommand(
+                user.getId(), request.getName(), request.getType(),
+                request.getColor(), request.getIcon()
+        );
+        Category category = categoryService.createCategory(command);
+        return ResponseEntity.ok(categoryMapper.toResponse(category));
     }
 
-    /**
-     * 카테고리 목록 조회
-     */
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getCategories(
             @AuthenticationPrincipal User user,
@@ -53,40 +50,33 @@ public class CategoryController {
             @RequestParam(required = false) Boolean isActive
     ) {
         GetCategoriesQuery query = new GetCategoriesQuery(user.getId(), type, isActive);
-        List<CategoryResponse> categories = categoryService.getCategories(query);
-        return ResponseEntity.ok(categories);
+        List<Category> categories = categoryService.getCategories(query);
+        return ResponseEntity.ok(categoryMapper.toResponseList(categories));
     }
 
-    /**
-     * 카테고리 상세 조회
-     */
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> getCategory(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
         GetCategoryQuery query = new GetCategoryQuery(user.getId(), id);
-        CategoryResponse category = categoryService.getCategory(query);
-        return ResponseEntity.ok(category);
+        Category category = categoryService.getCategory(query);
+        return ResponseEntity.ok(categoryMapper.toResponse(category));
     }
 
-    /**
-     * 카테고리 수정
-     */
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(
             @AuthenticationPrincipal User user,
             @PathVariable Long id,
             @RequestBody CategoryUpdateRequest request
     ) {
-        UpdateCategoryCommand command = UpdateCategoryCommand.from(user.getId(), id, request);
-        CategoryResponse response = categoryService.updateCategory(command);
-        return ResponseEntity.ok(response);
+        UpdateCategoryCommand command = new UpdateCategoryCommand(
+                user.getId(), id, request.getName(), request.getColor(), request.getIcon()
+        );
+        Category category = categoryService.updateCategory(command);
+        return ResponseEntity.ok(categoryMapper.toResponse(category));
     }
 
-    /**
-     * 카테고리 삭제 (비활성화)
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(
             @AuthenticationPrincipal User user,

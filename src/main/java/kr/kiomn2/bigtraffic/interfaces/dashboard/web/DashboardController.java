@@ -1,8 +1,12 @@
 package kr.kiomn2.bigtraffic.interfaces.dashboard.web;
 
-import kr.kiomn2.bigtraffic.application.dashboard.dto.DashboardResponse;
 import kr.kiomn2.bigtraffic.application.dashboard.facade.DashboardFacade;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
+import kr.kiomn2.bigtraffic.interfaces.dashboard.dto.response.DashboardResponse;
+import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.BankAccountResponse;
+import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.CardResponse;
+import kr.kiomn2.bigtraffic.interfaces.finance.mapper.BankAccountMapper;
+import kr.kiomn2.bigtraffic.interfaces.finance.mapper.CardMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
 
 /**
  * 대시보드 웹 컨트롤러
@@ -21,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class DashboardController {
 
     private final DashboardFacade dashboardFacade;
+    private final BankAccountMapper bankAccountMapper;
+    private final CardMapper cardMapper;
 
     /**
      * 대시보드 메인 페이지
@@ -34,7 +42,24 @@ public class DashboardController {
         log.info("대시보드 페이지 접근 - userId: {}, email: {}", user.getId(), user.getEmail());
 
         try {
-            DashboardResponse dashboard = dashboardFacade.getDashboard(user);
+            DashboardFacade.DashboardData data = dashboardFacade.getDashboard(user);
+
+            List<BankAccountResponse> accountResponses = data.getAccounts().stream()
+                    .map(bankAccountMapper::toResponse)
+                    .toList();
+
+            List<CardResponse> cardResponses = data.getCards().stream()
+                    .map(cardMapper::toResponse)
+                    .toList();
+
+            DashboardResponse dashboard = DashboardResponse.of(
+                    data.getTotalAssets(),
+                    data.getTotalBalance(),
+                    accountResponses,
+                    cardResponses,
+                    data.getUsername(),
+                    data.getEmail()
+            );
 
             model.addAttribute("totalAssets", dashboard.getTotalAssets());
             model.addAttribute("totalBalance", dashboard.getTotalBalance());

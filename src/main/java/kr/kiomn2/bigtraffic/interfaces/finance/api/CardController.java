@@ -3,24 +3,25 @@ package kr.kiomn2.bigtraffic.interfaces.finance.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import kr.kiomn2.bigtraffic.application.finance.command.CreateCardCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.DeleteCardCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.SetDefaultCardCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.UpdateCardCommand;
-import kr.kiomn2.bigtraffic.application.finance.query.GetCardQuery;
-import kr.kiomn2.bigtraffic.application.finance.query.GetCardsQuery;
-import kr.kiomn2.bigtraffic.application.finance.service.CardService;
+import kr.kiomn2.bigtraffic.domain.finance.command.*;
+import kr.kiomn2.bigtraffic.domain.finance.entity.Card;
+import kr.kiomn2.bigtraffic.domain.finance.query.GetCardQuery;
+import kr.kiomn2.bigtraffic.domain.finance.query.GetCardsQuery;
+import kr.kiomn2.bigtraffic.domain.finance.service.CardService;
 import kr.kiomn2.bigtraffic.domain.finance.vo.CardType;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.request.CardCreateRequest;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.request.CardUpdateRequest;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.CardListResponse;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.CardResponse;
+import kr.kiomn2.bigtraffic.interfaces.finance.mapper.CardMapper;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Card", description = "카드 관리 API")
 @RestController
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 public class CardController {
 
     private final CardService cardService;
+    private final CardMapper cardMapper;
 
     @Operation(summary = "카드 등록", description = "새로운 카드를 등록합니다.")
     @PostMapping
@@ -38,9 +40,14 @@ public class CardController {
 
         Long userId = user.getId();
 
-        CreateCardCommand command = CreateCardCommand.from(userId, request);
-        CardResponse response = cardService.createCard(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        CreateCardCommand command = new CreateCardCommand(
+                userId, request.getCardName(), request.getCardCompany(),
+                request.getCardNumber(), request.getCardType(),
+                request.getBalance(), request.getCreditLimit(),
+                request.getBillingDay(), request.getColor(), request.getMemo()
+        );
+        Card card = cardService.createCard(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cardMapper.toResponse(card));
     }
 
     @Operation(summary = "카드 목록 조회", description = "사용자의 카드 목록을 조회합니다.")
@@ -53,9 +60,9 @@ public class CardController {
         Long userId = user.getId();
 
         GetCardsQuery query = new GetCardsQuery(userId, cardType, isActive);
-        CardListResponse response = cardService.getCards(query);
+        List<Card> cards = cardService.getCards(query);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(cardMapper.toListResponse(cards));
     }
 
     @Operation(summary = "카드 상세 조회", description = "특정 카드의 상세 정보를 조회합니다.")
@@ -67,9 +74,9 @@ public class CardController {
         Long userId = user.getId();
 
         GetCardQuery query = new GetCardQuery(userId, id);
-        CardResponse response = cardService.getCard(query);
+        Card card = cardService.getCard(query);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(cardMapper.toDetailResponse(card));
     }
 
     @Operation(summary = "카드 수정", description = "카드 정보를 수정합니다.")
@@ -81,9 +88,14 @@ public class CardController {
 
         Long userId = user.getId();
 
-        UpdateCardCommand command = UpdateCardCommand.from(userId, id, request);
-        CardResponse response = cardService.updateCard(command);
-        return ResponseEntity.ok(response);
+        UpdateCardCommand command = new UpdateCardCommand(
+                userId, id, request.getCardName(), request.getCardCompany(),
+                request.getCardType(), request.getBalance(),
+                request.getCreditLimit(), request.getIsActive(),
+                request.getColor(), request.getMemo()
+        );
+        Card card = cardService.updateCard(command);
+        return ResponseEntity.ok(cardMapper.toResponse(card));
     }
 
     @Operation(summary = "카드 삭제", description = "카드를 삭제합니다.")
@@ -109,8 +121,8 @@ public class CardController {
         Long userId = user.getId();
 
         SetDefaultCardCommand command = new SetDefaultCardCommand(userId, id);
-        CardResponse response = cardService.setDefaultCard(command);
+        Card card = cardService.setDefaultCard(command);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(cardMapper.toResponse(card));
     }
 }

@@ -1,14 +1,18 @@
 package kr.kiomn2.bigtraffic.interfaces.finance.web;
 
-import kr.kiomn2.bigtraffic.application.finance.query.GetBankAccountQuery;
-import kr.kiomn2.bigtraffic.application.finance.query.GetCardQuery;
-import kr.kiomn2.bigtraffic.application.finance.service.BankAccountService;
-import kr.kiomn2.bigtraffic.application.finance.service.CardService;
+import kr.kiomn2.bigtraffic.domain.finance.entity.BankAccount;
+import kr.kiomn2.bigtraffic.domain.finance.entity.Card;
+import kr.kiomn2.bigtraffic.domain.finance.query.GetBankAccountQuery;
+import kr.kiomn2.bigtraffic.domain.finance.query.GetCardQuery;
+import kr.kiomn2.bigtraffic.domain.finance.service.BankAccountService;
+import kr.kiomn2.bigtraffic.domain.finance.service.CardService;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import kr.kiomn2.bigtraffic.domain.finance.vo.AccountType;
 import kr.kiomn2.bigtraffic.domain.finance.vo.CardType;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.BankAccountResponse;
 import kr.kiomn2.bigtraffic.interfaces.finance.dto.response.CardResponse;
+import kr.kiomn2.bigtraffic.interfaces.finance.mapper.BankAccountMapper;
+import kr.kiomn2.bigtraffic.interfaces.finance.mapper.CardMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +30,8 @@ public class FinanceWebController {
 
     private final BankAccountService bankAccountService;
     private final CardService cardService;
+    private final BankAccountMapper bankAccountMapper;
+    private final CardMapper cardMapper;
 
     @GetMapping("/add-account")
     public String addAccountForm(Model model) {
@@ -45,9 +51,10 @@ public class FinanceWebController {
 
         try {
             GetBankAccountQuery query = new GetBankAccountQuery(user.getId(), id);
-            BankAccountResponse account = bankAccountService.getBankAccount(query);
+            BankAccount account = bankAccountService.getBankAccount(query);
+            BankAccountResponse response = bankAccountMapper.toDetailResponse(account);
 
-            model.addAttribute("account", account);
+            model.addAttribute("account", response);
             model.addAttribute("username", user.getName());
 
             log.info("계좌 상세 페이지 렌더링 완료 - accountId: {}", id);
@@ -66,9 +73,10 @@ public class FinanceWebController {
 
         try {
             GetCardQuery query = new GetCardQuery(user.getId(), id);
-            CardResponse card = cardService.getCard(query);
+            Card card = cardService.getCard(query);
+            CardResponse response = cardMapper.toDetailResponse(card);
 
-            model.addAttribute("card", card);
+            model.addAttribute("card", response);
             model.addAttribute("username", user.getName());
 
             log.info("카드 상세 페이지 렌더링 완료 - cardId: {}", id);

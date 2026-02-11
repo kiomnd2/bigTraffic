@@ -1,17 +1,17 @@
 package kr.kiomn2.bigtraffic.interfaces.accountbook.api;
 
-import kr.kiomn2.bigtraffic.application.accountbook.command.CreateTransactionCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.command.DeleteTransactionCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.query.GetMonthlyCalendarQuery;
-import kr.kiomn2.bigtraffic.application.accountbook.query.GetTransactionQuery;
-import kr.kiomn2.bigtraffic.application.accountbook.query.GetTransactionsPagedQuery;
-import kr.kiomn2.bigtraffic.application.accountbook.query.GetTransactionsQuery;
-import kr.kiomn2.bigtraffic.application.accountbook.service.TransactionService;
+import kr.kiomn2.bigtraffic.application.accountbook.facade.AccountBookFacade;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.CreateTransactionCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.DeleteTransactionCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.entity.Transaction;
+import kr.kiomn2.bigtraffic.domain.accountbook.query.*;
+import kr.kiomn2.bigtraffic.domain.accountbook.service.TransactionService;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.request.TransactionCreateRequest;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.MonthlyCalendarResponse;
 import kr.kiomn2.bigtraffic.interfaces.accountbook.dto.response.TransactionResponse;
+import kr.kiomn2.bigtraffic.interfaces.accountbook.mapper.TransactionMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,10 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
-/**
- * 가계부 거래 API 컨트롤러
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -35,25 +33,24 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final AccountBookFacade accountBookFacade;
+    private final TransactionMapper transactionMapper;
 
-    /**
-     * 거래 생성
-     * 결제 수단에 따라 계좌/카드 잔액이 자동으로 업데이트됩니다.
-     */
     @PostMapping
     public ResponseEntity<TransactionResponse> createTransaction(
             @AuthenticationPrincipal User user,
             @RequestBody TransactionCreateRequest request
     ) {
-        CreateTransactionCommand command = CreateTransactionCommand.from(user.getId(), request);
-        TransactionResponse response = transactionService.createTransaction(command);
-        return ResponseEntity.ok(response);
+        CreateTransactionCommand command = new CreateTransactionCommand(
+                user.getId(), request.getType(), request.getAmount(),
+                request.getCategoryId(), request.getDescription(),
+                request.getTransactionDate(), request.getPaymentMethod(),
+                request.getAccountId(), request.getCardId(), request.getMemo()
+        );
+        Transaction tx = accountBookFacade.createTransactionWithBalance(command);
+        return ResponseEntity.ok(transactionMapper.toResponse(tx));
     }
 
-    /**
-     * 거래 목록 조회
-     * 동적 필터링 지원 (유형, 카테고리, 기간, 계좌, 카드)
-     */
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getTransactions(
             @AuthenticationPrincipal User user,
@@ -67,26 +64,20 @@ public class TransactionController {
         GetTransactionsQuery query = new GetTransactionsQuery(
                 user.getId(), type, categoryId, startDate, endDate, accountId, cardId
         );
-        List<TransactionResponse> transactions = transactionService.getTransactions(query);
-        return ResponseEntity.ok(transactions);
+        List<Transaction> transactions = transactionService.getTransactions(query);
+        return ResponseEntity.ok(transactionMapper.toResponseList(transactions));
     }
 
-    /**
-     * 거래 상세 조회
-     */
     @GetMapping("/{id}")
     public ResponseEntity<TransactionResponse> getTransaction(
             @AuthenticationPrincipal User user,
             @PathVariable Long id
     ) {
         GetTransactionQuery query = new GetTransactionQuery(user.getId(), id);
-        TransactionResponse transaction = transactionService.getTransaction(query);
-        return ResponseEntity.ok(transaction);
+        Transaction transaction = transactionService.getTransaction(query);
+        return ResponseEntity.ok(transactionMapper.toResponse(transaction));
     }
 
-    /**
-     * 거래 삭제
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(
             @AuthenticationPrincipal User user,
@@ -97,10 +88,6 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 거래 목록 조회 (페이징 지원)
-     * 동적 필터링 및 페이지네이션 지원
-     */
     @GetMapping("/paged")
     public ResponseEntity<Page<TransactionResponse>> getTransactionsPaged(
             @AuthenticationPrincipal User user,
@@ -117,14 +104,10 @@ public class TransactionController {
         GetTransactionsPagedQuery query = new GetTransactionsPagedQuery(
                 user.getId(), type, categoryId, startDate, endDate, accountId, cardId, pageable
         );
-        Page<TransactionResponse> transactions = transactionService.getTransactionsPaged(query);
-        return ResponseEntity.ok(transactions);
+        Page<Transaction> transactions = transactionService.getTransactionsPaged(query);
+        return ResponseEntity.ok(transactionMapper.toResponsePage(transactions));
     }
 
-    /**
-     * 월별 캘린더 데이터 조회
-     * 날짜별 거래 요약 및 월별 합계 제공
-     */
     @GetMapping("/calendar/{year}/{month}")
     public ResponseEntity<MonthlyCalendarResponse> getMonthlyCalendar(
             @AuthenticationPrincipal User user,
@@ -132,7 +115,8 @@ public class TransactionController {
             @PathVariable int month
     ) {
         GetMonthlyCalendarQuery query = new GetMonthlyCalendarQuery(user.getId(), year, month);
-        MonthlyCalendarResponse calendar = transactionService.getMonthlyCalendar(query);
+        Map<LocalDate, List<Transaction>> grouped = transactionService.getMonthlyTransactions(query);
+        MonthlyCalendarResponse calendar = transactionMapper.toMonthlyCalendarResponse(year, month, grouped);
         return ResponseEntity.ok(calendar);
     }
 }
