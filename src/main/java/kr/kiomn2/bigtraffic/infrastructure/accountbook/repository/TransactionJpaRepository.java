@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Long>, TransactionRepositoryCustom {
+public interface TransactionJpaRepository extends JpaRepository<Transaction, Long> {
 
     /**
      * 사용자 ID로 거래 목록 조회

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 @Repository
-public interface BlacklistedTokenRepository extends JpaRepository<BlacklistedToken, Long> {
+public interface BlacklistedTokenJpaRepository extends JpaRepository<BlacklistedToken, Long> {
 
     /**
      * 토큰이 블랙리스트에 존재하는지 확인

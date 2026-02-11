@@ -3,21 +3,46 @@ package kr.kiomn2.bigtraffic.infrastructure.accountbook.repository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.kiomn2.bigtraffic.domain.accountbook.entity.Transaction;
+import kr.kiomn2.bigtraffic.domain.accountbook.repository.TransactionRepository;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static kr.kiomn2.bigtraffic.domain.accountbook.entity.QTransaction.transaction;
 
+@Repository
 @RequiredArgsConstructor
-public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
+public class TransactionRepositoryImpl implements TransactionRepository {
 
+    private final TransactionJpaRepository jpaRepository;
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public Optional<Transaction> findByIdAndUserId(Long id, Long userId) {
+        return jpaRepository.findByIdAndUserId(id, userId);
+    }
+
+    @Override
+    public Transaction save(Transaction transaction) {
+        return jpaRepository.save(transaction);
+    }
+
+    @Override
+    public void delete(Transaction transaction) {
+        jpaRepository.delete(transaction);
+    }
+
+    @Override
+    public List<Transaction> findByUserIdAndDateBetween(Long userId, LocalDate startDate, LocalDate endDate) {
+        return jpaRepository.findByUserIdAndDateBetween(userId, startDate, endDate);
+    }
 
     @Override
     public List<Transaction> findByDynamicConditions(
@@ -41,37 +66,6 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
                 )
                 .orderBy(transaction.transactionDate.desc(), transaction.createdAt.desc())
                 .fetch();
-    }
-
-    private BooleanExpression userIdEq(Long userId) {
-        return userId != null ? transaction.userId.eq(userId) : null;
-    }
-
-    private BooleanExpression typeEq(TransactionType type) {
-        return type != null ? transaction.type.eq(type) : null;
-    }
-
-    private BooleanExpression categoryIdEq(Long categoryId) {
-        return categoryId != null ? transaction.categoryId.eq(categoryId) : null;
-    }
-
-    private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
-        if (startDate != null && endDate != null) {
-            return transaction.transactionDate.between(startDate, endDate);
-        } else if (startDate != null) {
-            return transaction.transactionDate.goe(startDate);
-        } else if (endDate != null) {
-            return transaction.transactionDate.loe(endDate);
-        }
-        return null;
-    }
-
-    private BooleanExpression accountIdEq(Long accountId) {
-        return accountId != null ? transaction.accountId.eq(accountId) : null;
-    }
-
-    private BooleanExpression cardIdEq(Long cardId) {
-        return cardId != null ? transaction.cardId.eq(cardId) : null;
     }
 
     @Override
@@ -114,5 +108,36 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression userIdEq(Long userId) {
+        return userId != null ? transaction.userId.eq(userId) : null;
+    }
+
+    private BooleanExpression typeEq(TransactionType type) {
+        return type != null ? transaction.type.eq(type) : null;
+    }
+
+    private BooleanExpression categoryIdEq(Long categoryId) {
+        return categoryId != null ? transaction.categoryId.eq(categoryId) : null;
+    }
+
+    private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            return transaction.transactionDate.between(startDate, endDate);
+        } else if (startDate != null) {
+            return transaction.transactionDate.goe(startDate);
+        } else if (endDate != null) {
+            return transaction.transactionDate.loe(endDate);
+        }
+        return null;
+    }
+
+    private BooleanExpression accountIdEq(Long accountId) {
+        return accountId != null ? transaction.accountId.eq(accountId) : null;
+    }
+
+    private BooleanExpression cardIdEq(Long cardId) {
+        return cardId != null ? transaction.cardId.eq(cardId) : null;
     }
 }

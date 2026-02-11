@@ -1,8 +1,8 @@
 package kr.kiomn2.bigtraffic.infrastructure.auth.security.oauth;
 
-import kr.kiomn2.bigtraffic.application.accountbook.service.CategoryService;
+import kr.kiomn2.bigtraffic.domain.accountbook.service.CategoryService;
 import kr.kiomn2.bigtraffic.domain.auth.entity.User;
-import kr.kiomn2.bigtraffic.infrastructure.auth.repository.UserRepository;
+import kr.kiomn2.bigtraffic.domain.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

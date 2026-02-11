@@ -1,6 +1,6 @@
 package kr.kiomn2.bigtraffic.infrastructure.auth.security;
 
-import kr.kiomn2.bigtraffic.infrastructure.auth.repository.UserRepository;
+import kr.kiomn2.bigtraffic.domain.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

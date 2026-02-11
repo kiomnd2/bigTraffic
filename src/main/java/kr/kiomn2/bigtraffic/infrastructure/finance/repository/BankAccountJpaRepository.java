@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BankAccountRepository extends JpaRepository<BankAccount, Long>, BankAccountRepositoryCustom {
+public interface BankAccountJpaRepository extends JpaRepository<BankAccount, Long> {
 
     List<BankAccount> findByUserId(Long userId);
 

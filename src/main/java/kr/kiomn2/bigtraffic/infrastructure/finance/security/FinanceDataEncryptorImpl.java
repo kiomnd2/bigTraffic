@@ -15,7 +15,7 @@ import java.util.Base64;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class FinanceDataEncryptor {
+public class FinanceDataEncryptorImpl implements kr.kiomn2.bigtraffic.domain.finance.service.FinanceDataEncryptor {
 
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_IV_LENGTH = 12; // 12 bytes

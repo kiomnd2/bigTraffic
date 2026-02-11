@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CardRepository extends JpaRepository<Card, Long>, CardRepositoryCustom {
+public interface CardJpaRepository extends JpaRepository<Card, Long> {
 
     List<Card> findByUserId(Long userId);
 
