@@ -1,7 +1,7 @@
 package kr.kiomn2.bigtraffic.domain.finance.exception;
 
-import kr.kiomn2.bigtraffic.domain.auth.exception.BusinessException;
-import kr.kiomn2.bigtraffic.domain.auth.exception.ErrorCode;
+import kr.kiomn2.bigtraffic.common.exception.BusinessException;
+import kr.kiomn2.bigtraffic.common.exception.ErrorCode;
 
 public class DuplicateFinanceAssetException extends BusinessException {
 

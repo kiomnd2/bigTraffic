@@ -1,7 +1,7 @@
 package kr.kiomn2.bigtraffic.infrastructure.exception;
 
-import kr.kiomn2.bigtraffic.domain.auth.exception.BusinessException;
-import kr.kiomn2.bigtraffic.domain.auth.exception.ErrorCode;
+import kr.kiomn2.bigtraffic.common.exception.BusinessException;
+import kr.kiomn2.bigtraffic.common.exception.ErrorCode;
 import kr.kiomn2.bigtraffic.interfaces.auth.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;

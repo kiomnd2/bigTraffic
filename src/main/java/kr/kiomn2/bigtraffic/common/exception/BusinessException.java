@@ -1,4 +1,4 @@
-package kr.kiomn2.bigtraffic.domain.auth.exception;
+package kr.kiomn2.bigtraffic.common.exception;
 
 import lombok.Getter;
 
