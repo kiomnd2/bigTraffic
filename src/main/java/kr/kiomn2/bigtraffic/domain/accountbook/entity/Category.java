@@ -1,8 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.accountbook.entity;
 
 import jakarta.persistence.*;
-import kr.kiomn2.bigtraffic.application.accountbook.command.CreateCategoryCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.command.UpdateCategoryCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.CreateCategoryCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.UpdateCategoryCommand;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

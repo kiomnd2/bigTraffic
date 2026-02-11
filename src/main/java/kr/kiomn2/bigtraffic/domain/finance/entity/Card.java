@@ -1,8 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.finance.entity;
 
 import jakarta.persistence.*;
-import kr.kiomn2.bigtraffic.application.finance.command.CreateCardCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.UpdateCardCommand;
+import kr.kiomn2.bigtraffic.domain.finance.command.CreateCardCommand;
+import kr.kiomn2.bigtraffic.domain.finance.command.UpdateCardCommand;
 import kr.kiomn2.bigtraffic.domain.finance.vo.CardType;
 import kr.kiomn2.bigtraffic.infrastructure.finance.security.CardNumberConverter;
 import lombok.*;

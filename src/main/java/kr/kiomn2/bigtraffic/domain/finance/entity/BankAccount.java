@@ -1,8 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.finance.entity;
 
 import jakarta.persistence.*;
-import kr.kiomn2.bigtraffic.application.finance.command.CreateBankAccountCommand;
-import kr.kiomn2.bigtraffic.application.finance.command.UpdateBankAccountCommand;
+import kr.kiomn2.bigtraffic.domain.finance.command.CreateBankAccountCommand;
+import kr.kiomn2.bigtraffic.domain.finance.command.UpdateBankAccountCommand;
 import kr.kiomn2.bigtraffic.domain.finance.vo.AccountType;
 import kr.kiomn2.bigtraffic.infrastructure.finance.security.AccountNumberConverter;
 import lombok.*;

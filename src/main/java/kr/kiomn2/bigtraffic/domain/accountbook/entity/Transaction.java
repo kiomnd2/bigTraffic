@@ -1,8 +1,8 @@
 package kr.kiomn2.bigtraffic.domain.accountbook.entity;
 
 import jakarta.persistence.*;
-import kr.kiomn2.bigtraffic.application.accountbook.command.CreateTransactionCommand;
-import kr.kiomn2.bigtraffic.application.accountbook.command.UpdateTransactionCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.CreateTransactionCommand;
+import kr.kiomn2.bigtraffic.domain.accountbook.command.UpdateTransactionCommand;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.PaymentMethod;
 import kr.kiomn2.bigtraffic.domain.accountbook.vo.TransactionType;
 import lombok.*;
