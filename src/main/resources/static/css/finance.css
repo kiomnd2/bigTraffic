@@ -1869,3 +1869,359 @@ body {
         border-right: none;
     }
 }
+
+/* ===== Room (공유 방) 스타일 ===== */
+
+.room-count-badge {
+    font-size: 14px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* 방 목록 */
+.room-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.room-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.room-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+    border: 1px solid #e0e0e0;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.room-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.room-card-icon {
+    font-size: 28px;
+    line-height: 1;
+}
+
+.room-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.room-card-title h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.room-status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-dissolved {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.room-card-body {
+    margin-left: 40px;
+}
+
+.room-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.room-card-footer {
+    margin-top: 12px;
+    margin-left: 40px;
+}
+
+.room-meta {
+    font-size: 13px;
+    color: #999;
+}
+
+/* 방 참여 폼 */
+.room-join-form {
+    padding: 0;
+}
+
+.join-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.join-input-group input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.join-input-group input:focus {
+    border-color: #667eea;
+}
+
+/* 방 상세 - 정보 그리드 */
+.room-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* 멤버 목록 */
+.member-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.member-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.member-avatar {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.member-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.member-id {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.member-role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.role-host {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.role-member {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* 초대 목록 */
+.invite-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.invite-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.invite-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.invite-code {
+    font-size: 13px;
+    background: #1a1a1a;
+    color: #10b981;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+
+.invite-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.invite-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.invite-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.invite-expired {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.invite-expires {
+    font-size: 12px;
+    color: #999;
+}
+
+.invite-actions {
+    display: flex;
+    gap: 6px;
+}
+
+/* 가계부 연결 목록 */
+.accountbook-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.accountbook-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.accountbook-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.accountbook-icon {
+    font-size: 20px;
+}
+
+.accountbook-id {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* 작은 버튼 */
+.btn-danger-small {
+    padding: 4px 12px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-danger-small:hover {
+    background: #dc2626;
+}
+
+.btn-secondary-small {
+    padding: 4px 12px;
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-secondary-small:hover {
+    background: #e0e0e0;
+}
+
+/* 힌트 텍스트 */
+.form-hint {
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+/* 반응형 - 방 */
+@media (max-width: 768px) {
+    .room-card-header {
+        flex-direction: row;
+    }
+
+    .invite-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .member-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .join-input-group {
+        flex-direction: column;
+    }
+
+    .join-input-group input {
+        width: 100%;
+    }
+}

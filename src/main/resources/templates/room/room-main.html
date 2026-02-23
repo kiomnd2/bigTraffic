@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공유 방</title>
+    <link rel="stylesheet" th:href="@{/css/finance.css}">
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="btn-back">&larr; 대시보드</a>
+            <h1>공유 방</h1>
+        </div>
+        <div class="user-info">
+            <span th:text="${username}">사용자</span>
+            <a href="/rooms/create" class="btn-add">+ 방 만들기</a>
+        </div>
+    </header>
+
+    <div class="content">
+        <!-- 방 목록 -->
+        <section class="dashboard-partition">
+            <div class="partition-header">
+                <h2>참여 중인 방</h2>
+                <span class="room-count-badge" th:text="${totalCount} + '개'">0개</span>
+            </div>
+
+            <div class="room-list">
+                <!-- 빈 메시지 -->
+                <div th:if="${#lists.isEmpty(rooms)}" class="empty-message">
+                    <p>참여 중인 방이 없습니다.</p>
+                    <p style="margin-top: 8px; color: #999;">방을 만들거나 초대 코드로 참여해보세요.</p>
+                </div>
+
+                <!-- 방 카드 목록 -->
+                <a th:each="room : ${rooms}" th:href="@{/rooms/{id}(id=${room.id})}" class="room-card-link">
+                    <div class="room-card">
+                        <div class="room-card-header">
+                            <div class="room-card-icon">&#127968;</div>
+                            <div class="room-card-title">
+                                <h3 th:text="${room.name}">방 이름</h3>
+                                <span class="room-status-badge" th:classappend="${room.status.toString() == 'ACTIVE'} ? 'status-active' : 'status-dissolved'"
+                                      th:text="${room.status.description}">활성</span>
+                            </div>
+                        </div>
+                        <div class="room-card-body">
+                            <p class="room-description" th:if="${room.description}" th:text="${room.description}">방 설명</p>
+                            <p class="room-description" th:unless="${room.description}" style="color: #bbb;">설명 없음</p>
+                        </div>
+                        <div class="room-card-footer">
+                            <span class="room-meta">최대 <span th:text="${room.maxMembers}">10</span>명</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 초대 코드로 참여 -->
+        <section class="dashboard-partition" style="margin-top: 24px;">
+            <div class="partition-header">
+                <h2>초대 코드로 참여</h2>
+            </div>
+
+            <form id="joinRoomForm" class="room-join-form">
+                <div class="join-input-group">
+                    <input type="text" id="inviteCode" placeholder="초대 코드를 입력하세요" required>
+                    <button type="submit" class="btn-primary">참여</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.getElementById('joinRoomForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const inviteCode = document.getElementById('inviteCode').value.trim();
+        if (!inviteCode) {
+            alert('초대 코드를 입력해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/v1/rooms/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ inviteCode: inviteCode }),
+                credentials: 'include'
+            });
+
+            if (response.ok || response.status === 201) {
+                alert('방에 참여했습니다!');
+                location.reload();
+            } else {
+                const error = await response.json();
+                alert('참여 실패: ' + (error.message || '유효하지 않은 초대 코드입니다.'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('방 참여 중 오류가 발생했습니다.');
+        }
+    });
+</script>
+</body>
+</html>

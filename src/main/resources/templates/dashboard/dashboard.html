@@ -12,6 +12,7 @@
         <h1>대시보드</h1>
         <div class="user-info">
             <span th:text="${username}">사용자</span>
+            <a href="/rooms" class="btn-logout" style="text-decoration: none;">공유 방</a>
             <a href="/ledger/categories" class="btn-logout" style="text-decoration: none;">설정</a>
             <button onclick="handleLogout()" class="btn-logout">로그아웃</button>
         </div>
